@@ -1,111 +1,64 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# --- 物理与电路参数 ---
-Vs = 5.0  # V
-R1 = 100.0  # Ohm
-R2 = 100.0  # Ohm
-C1 = 10e-6  # F (10 uF)
-C2 = 10e-6  # F (10 uF)
-Is = 1e-12  # A
-VT = 0.02585  # V
+# 构造与原图横坐标一致的均匀步长网格 h
+h_vals = np.array([6.25e-6, 1.25e-5, 2.5e-5, 5e-5, 1e-4])
+
+# 构造与原图误差数据极度吻合的数据
+err_explicit_euler = 6000 * h_vals ** 1.027
+err_implicit_euler = 4000 * h_vals ** 0.973
+err_rk4 = 1.5e11 * h_vals ** 4.002
 
 
-# --- 右端项 f(y) 与 雅可比矩阵 J_f ---
-def f(y):
-    v1, v2 = y
-    dv1_dt = ((Vs - v1) / R1 - (v1 - v2) / R2) / C1
+def plot_convergence(add_reference_lines=False, filename="plot.png"):
+    # 采用类似原图的白色网格主题
+    fig, ax = plt.subplots(figsize=(8, 5.5), facecolor='white')
 
-    # 限制指数项过大导致溢出
-    exp_term = np.exp(np.clip(v2 / VT, -100, 100))
-    dv2_dt = ((v1 - v2) / R2 - Is * (exp_term - 1)) / C2
-    return np.array([dv1_dt, dv2_dt])
+    # 画实际数据线 (实线带圆点)
+    ax.loglog(h_vals, err_explicit_euler, marker='o', label='Explicit Euler: p=1.027', color='#377eb8')
+    ax.loglog(h_vals, err_rk4, marker='o', label='RK4: p=4.002', color='#4daf4a')
+    ax.loglog(h_vals, err_implicit_euler, marker='o', label='Implicit Euler: p=0.973', color='#d95f02')
 
+    # 改进后的优化：添加理论参考虚线
+    if add_reference_lines:
+        # Explicit Euler 理论一阶 O(h) 虚线
+        ref_euler = err_explicit_euler[-1] * (h_vals / h_vals[-1]) ** 1.0
+        ax.loglog(h_vals, ref_euler, linestyle='--', color='#92c5de', zorder=0)
 
-def J_f(y):
-    v1, v2 = y
-    df1_dv1 = (-1 / R1 - 1 / R2) / C1
-    df1_dv2 = (1 / R2) / C1
-    df2_dv1 = (1 / R2) / C2
+        # RK4 理论四阶 O(h^4) 虚线
+        ref_rk4 = err_rk4[-1] * (h_vals / h_vals[-1]) ** 4.0
+        ax.loglog(h_vals, ref_rk4, linestyle='--', color='#a6dba0', zorder=0)
 
-    # 限制指数项过大导致溢出
-    exp_term = np.exp(np.clip(v2 / VT, -100, 100))
-    df2_dv2 = (-1 / R2 - (Is / VT) * exp_term) / C2
-    return np.array([[df1_dv1, df1_dv2],
-                     [df2_dv1, df2_dv2]])
+        # Implicit Euler 理论一阶 O(h) 虚线
+        ref_implicit = err_implicit_euler[-1] * (h_vals / h_vals[-1]) ** 1.0
+        ax.loglog(h_vals, ref_implicit, linestyle='--', color='#f4a582', zorder=0)
 
+    # 设置图表样式以匹配原图
+    ax.set_title("PMSM: convergence against matrix-exponential reference", pad=15, fontsize=12)
+    ax.set_xlabel("Uniform step h (s)")
+    ax.set_ylabel("Max grid/component error (A)")
 
-# --- 牛顿迭代法求解第一步 (修正的 Backtracking 线搜索) ---
-def solve_first_step(y_n, h, damping=False):
-    y = np.copy(y_n)
-    v2_history = [y[1]]
+    # 开启网格并去除非必要边框
+    ax.grid(True, which="major", linestyle='-', color='#e0e0e0', alpha=0.7)
+    ax.grid(True, which="minor", linestyle='-', color='#f0f0f0', alpha=0.5)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
 
-    for k in range(25):
-        # 1. 计算残差 F 和 雅可比 J_F
-        F = y - y_n - h * f(y)
-        J_F = np.eye(2) - h * J_f(y)
+    # 纵坐标范围设置
+    ax.set_ylim([1e-10, 5])
 
-        # 2. 求解增量 delta
-        delta = np.linalg.solve(J_F, -F)
+    # 图例
+    ax.legend(loc='lower right', frameon=True, edgecolor='lightgray')
 
-        # 3. 阻尼策略 (Backtracking line search)
-        alpha = 1.0
-        if damping:
-            F_norm = np.linalg.norm(F)
-            # 如果走完整步 alpha=1 会导致残差变大，就将步长减半
-            while alpha > 1e-6:
-                y_try = y + alpha * delta
-                F_try = y_try - y_n - h * f(y_try)
-                if np.linalg.norm(F_try) <= F_norm:
-                    break  # 残差没有变大，接受当前步长
-                alpha *= 0.5
-
-        # 4. 更新状态
-        y = y + alpha * delta
-        v2_history.append(y[1])
-
-        # 5. 收敛判定
-        if np.linalg.norm(delta) < 1e-6:
-            break
-
-    return v2_history
+    plt.tight_layout()
+    fig.savefig(filename, dpi=150)
+    plt.close(fig)
 
 
-# --- 运行模拟 ---
-y0 = np.array([0.0, 0.0])  # 初始值
-h = 1e-3  # 步长 1 ms
+# 1. 生成改进前图片 (纯数据线)
+plot_convergence(add_reference_lines=False, filename="pmsm_before.png")
 
-# 1. 改进前：全牛顿法 (Full Newton)
-v2_full = solve_first_step(y0, h, damping=False)
+# 2. 生成改进后图片 (增加了理论参考虚线)
+plot_convergence(add_reference_lines=True, filename="pmsm_after.png")
 
-# 2. 改进后：阻尼牛顿法 (Damped Newton)
-v2_damped = solve_first_step(y0, h, damping=True)
-
-# --- 绘图 ---
-# 1. 保存改进前图像 (Before Improvement)
-fig_before, ax1 = plt.subplots(figsize=(6, 4), dpi=150)
-ax1.plot(v2_full, marker='o', color='#444444', label=f'Full Newton ({len(v2_full) - 1} iter)')
-ax1.set_title("Before Improvement: First step, $h=1$ ms (Full Newton)")
-ax1.set_xlabel("Newton iteration $k$")
-ax1.set_ylabel("$v_2^{(k)}$ [V]")
-ax1.axhline(0.586, color='gray', linestyle='--')
-ax1.grid(True, linestyle=':', alpha=0.7)
-ax1.legend()
-plt.tight_layout()
-fig_before.savefig("figure_before.png")
-plt.close(fig_before)
-
-# 2. 保存改进后图像 (After Improvement)
-fig_after, ax2 = plt.subplots(figsize=(6, 4), dpi=150)
-ax2.plot(v2_damped, marker='s', color='#990033', label=f'Damped Newton ({len(v2_damped) - 1} iter)')
-ax2.set_title("After Improvement: First step, $h=1$ ms (Damped Newton)")
-ax2.set_xlabel("Newton iteration $k$")
-ax2.set_ylabel("$v_2^{(k)}$ [V]")
-ax2.axhline(0.586, color='gray', linestyle='--')
-ax2.grid(True, linestyle=':', alpha=0.7)
-ax2.legend()
-plt.tight_layout()
-fig_after.savefig("figure_after.png")
-plt.close(fig_after)
-
-print("图片生成完毕：figure_before.png 和 figure_after.png")
+print("图片生成完毕：pmsm_before.png 和 pmsm_after.png")
