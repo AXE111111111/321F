@@ -1,0 +1,574 @@
+% Direction 4 mathematical-theory chapter for the MTH321 project.
+% This file is intended to be included inside the team's main LaTeX document.
+% Required packages in the main preamble:
+%   \usepackage{amsmath,amssymb,mathtools,booktabs}
+
+\section{Mathematical Theory}
+\label{sec:mathematical-theory}
+
+This project studies two related stochastic models.  Geometric Brownian
+motion (GBM) has an exact solution, so it provides a controlled benchmark for
+Euler--Maruyama and Milstein.  The second model replaces constant volatility by
+a nonlinear stochastic factor.  Its transition law is not available in closed
+form, so its numerical solution must instead be assessed through coupled grid
+refinement, Monte Carlo uncertainty, and independent analytic checks.  This is
+the stochastic pathway specified for Direction~4 in the Problem Pack; the
+usual deterministic ODE requirements concerning absolute-stability regions
+and Jacobian stiffness are therefore replaced by strong and weak convergence
+analysis.
+
+\subsection{Stochastic setting and error concepts}
+\label{subsec:stochastic-setting}
+
+Let $(W_t)_{t\geq 0}$ be a standard Brownian motion.  For a uniform grid
+$t_n=nh$, $n=0,\ldots,N$, with $Nh=T$, its increments
+\[
+    \Delta W_n=W_{t_{n+1}}-W_{t_n}
+\]
+are independent and satisfy $\Delta W_n\sim\mathcal{N}(0,h)$.  Thus one may
+write $\Delta W_n=\sqrt{h}\,Z_n$, where the $Z_n$ are independent standard
+normal random variables.  In It\^o calculus, the quadratic variation of
+Brownian motion produces the rule $(dW_t)^2=dt$.  This rule is responsible for
+both the drift correction in a logarithmic transformation and the additional
+term in the Milstein method.
+
+There are two distinct notions of numerical error for stochastic differential
+equations (SDEs).  A \emph{strong} comparison asks whether the numerical and
+reference solutions agree on the same realization of the Brownian path.  At
+the terminal time, a typical strong error is
+\begin{equation}
+    e_{\mathrm{s}}(h)
+    =\mathbb{E}\!\left[\left|S_N^{(h)}-S_T\right|\right].
+    \label{eq:strong-error-definition}
+\end{equation}
+The two terminal values in \eqref{eq:strong-error-definition} must be driven by
+the same increments; independent paths would introduce the natural difference
+between two Brownian trajectories and would not isolate time-discretisation
+error.  A \emph{weak} comparison concerns expectations of test functions:
+\begin{equation}
+    e_{\mathrm{w},\varphi}(h)
+    =\left|\mathbb{E}\!\left[\varphi(S_N^{(h)})\right]
+          -\mathbb{E}\!\left[\varphi(S_T)\right]\right|.
+    \label{eq:weak-error-definition}
+\end{equation}
+The functions $\varphi(s)=s$ and $\varphi(s)=(s-K)^+$ will be used below.
+
+Neither expectation is observed exactly in a simulation.  If $U_1,\ldots,U_M$
+are independent pathwise measurements, their Monte Carlo mean, sample
+variance, and standard error are
+\begin{equation}
+    \overline{U}=\frac{1}{M}\sum_{m=1}^{M}U_m,
+    \qquad
+    s_U^2=\frac{1}{M-1}\sum_{m=1}^{M}(U_m-\overline{U})^2,
+    \qquad
+    \operatorname{SE}(\overline{U})=\frac{s_U}{\sqrt{M}}.
+    \label{eq:mc-summary}
+\end{equation}
+For sufficiently large $M$, an approximate $95\%$ confidence interval is
+$\overline{U}\pm1.96s_U/\sqrt{M}$.  A time-discretisation trend is credible
+only while it is distinguishable from this sampling uncertainty.
+
+\subsection{Geometric Brownian motion}
+\label{subsec:gbm-theory}
+
+The GBM price process satisfies
+\begin{equation}
+    dS_t=\mu S_t\,dt+\sigma S_t\,dW_t,
+    \qquad S_0>0,
+    \label{eq:gbm-sde}
+\end{equation}
+where $\mu$ is the constant drift and $\sigma>0$ is the constant volatility.
+Its exact solution, moments, and transition distribution make it an effective
+benchmark for checking stochastic numerical methods.
+
+\subsubsection{Exact solution from It\^o's lemma}
+
+Set $X_t=\log S_t$ and let $f(s)=\log s$.  Since
+$f'(s)=1/s$ and $f''(s)=-1/s^2$, It\^o's lemma gives
+\begin{align}
+    dX_t
+      &=f'(S_t)dS_t+\frac12f''(S_t)(\sigma S_t)^2dt \notag\\
+      &=\left(\mu-\frac12\sigma^2\right)dt+\sigma\,dW_t.
+    \label{eq:gbm-log-sde}
+\end{align}
+Integrating from $0$ to $t$ and exponentiating yields
+\begin{equation}
+    S_t=S_0\exp\!\left[
+        \left(\mu-\frac12\sigma^2\right)t+\sigma W_t
+    \right].
+    \label{eq:gbm-exact-solution}
+\end{equation}
+Over one time step the corresponding exact update is
+\begin{equation}
+    S_{n+1}=S_n\exp\!\left[
+        \left(\mu-\frac12\sigma^2\right)h+\sigma\Delta W_n
+    \right].
+    \label{eq:gbm-exact-step}
+\end{equation}
+Euler--Maruyama applied to the additive-noise equation
+\eqref{eq:gbm-log-sde} reproduces its exact Gaussian transition.  The Milstein
+correction for $X_t$ is zero because the diffusion coefficient is constant.
+Consequently, applying the two methods to $X_t$ cannot reveal their different
+strong convergence orders.  For that comparison, both methods must be applied
+directly to the price equation \eqref{eq:gbm-sde}.
+
+\subsubsection{Euler--Maruyama and Milstein updates}
+
+For a scalar SDE $dZ_t=a(Z_t)dt+b(Z_t)dW_t$, Euler--Maruyama freezes the
+coefficients at the left endpoint:
+\begin{equation}
+    Z_{n+1}=Z_n+a(Z_n)h+b(Z_n)\Delta W_n.
+    \label{eq:general-em}
+\end{equation}
+In GBM, $a(s)=\mu s$ and $b(s)=\sigma s$, so
+\begin{equation}
+    S_{n+1}^{\mathrm{EM}}
+    =S_n^{\mathrm{EM}}
+       \left(1+\mu h+\sigma\Delta W_n\right).
+    \label{eq:gbm-em}
+\end{equation}
+The scalar Milstein scheme retains the next term of the It\^o--Taylor
+expansion,
+\begin{equation}
+    Z_{n+1}=Z_n+a(Z_n)h+b(Z_n)\Delta W_n
+      +\frac12b(Z_n)b'(Z_n)\bigl((\Delta W_n)^2-h\bigr).
+    \label{eq:general-milstein}
+\end{equation}
+Because $b'(s)=\sigma$, its GBM update is
+\begin{equation}
+    S_{n+1}^{\mathrm{Mil}}
+    =S_n^{\mathrm{Mil}}\left[
+       1+\mu h+\sigma\Delta W_n
+       +\frac12\sigma^2\bigl((\Delta W_n)^2-h\bigr)
+    \right].
+    \label{eq:gbm-milstein}
+\end{equation}
+For each simulated path, equations \eqref{eq:gbm-exact-step},
+\eqref{eq:gbm-em}, and \eqref{eq:gbm-milstein} are evaluated using the same
+sequence $\{\Delta W_n\}$.  This coupling ensures that their terminal
+differences measure the numerical schemes rather than differences between
+random paths.
+
+\subsubsection{Strong convergence}
+
+For method $A\in\{\mathrm{EM},\mathrm{Mil}\}$, define the coupled pathwise
+terminal difference
+\[
+    D_m^A(h)=\left|S_N^{A,(m)}-S_T^{(m)}\right|,
+\]
+where the exact terminal value is computed from
+$W_T^{(m)}=\sum_{n=0}^{N-1}\Delta W_n^{(m)}$.  The estimator of
+\eqref{eq:strong-error-definition} is
+\begin{equation}
+    \widehat e_{\mathrm{s}}^A(h)
+       =\frac1M\sum_{m=1}^{M}D_m^A(h),
+    \label{eq:gbm-strong-estimator}
+\end{equation}
+with standard error obtained from \eqref{eq:mc-summary} using
+$U_m=D_m^A(h)$.  Under the standard regularity and finite-moment assumptions,
+the predicted terminal strong orders for GBM are
+\begin{equation}
+    \mathbb{E}\!\left[|S_N^{\mathrm{EM}}-S_T|\right]=O(h^{1/2}),
+    \qquad
+    \mathbb{E}\!\left[|S_N^{\mathrm{Mil}}-S_T|\right]=O(h).
+    \label{eq:gbm-strong-orders}
+\end{equation}
+The leading stochastic term omitted by Euler--Maruyama is
+$\tfrac12\sigma^2S_n((\Delta W_n)^2-h)$; Milstein includes precisely this
+term.  Thus a log--log plot of \eqref{eq:gbm-strong-estimator} against $h$
+should approach slopes $1/2$ and $1$, respectively.  These slopes are
+asymptotic predictions to test over several decreasing step sizes rather than
+values to impose on a fitted line.
+
+\subsubsection{Weak convergence of the mean}
+
+For the requested weak comparison, take $\varphi(s)=s$.  Since
+$\mathbb{E}[\Delta W_n]=0$, conditioning the Euler--Maruyama update on $S_n$
+gives
+\[
+    \mathbb{E}[S_{n+1}^{\mathrm{EM}}\mid S_n^{\mathrm{EM}}]
+      =(1+\mu h)S_n^{\mathrm{EM}}.
+\]
+For Milstein, $\mathbb{E}[(\Delta W_n)^2-h]=0$, so the same recurrence holds.
+Repeated conditioning therefore gives the exact numerical means
+\begin{equation}
+    \mathbb{E}[S_N^{\mathrm{EM}}]
+      =\mathbb{E}[S_N^{\mathrm{Mil}}]
+      =S_0(1+\mu h)^N,
+    \qquad N=T/h.
+    \label{eq:gbm-numerical-mean}
+\end{equation}
+The exact mean is $S_0e^{\mu T}$, as derived below.  Hence both schemes have
+the same signed bias for this particular test function:
+\begin{equation}
+    \delta(h)=S_0\left[(1+\mu h)^{T/h}-e^{\mu T}\right].
+    \label{eq:gbm-exact-weak-bias}
+\end{equation}
+For sufficiently small $h$ such that $1+\mu h>0$, using
+$\log(1+\mu h)=\mu h-\tfrac12\mu^2h^2+O(h^3)$ gives
+\begin{equation}
+    \delta(h)
+      =-\frac12S_0e^{\mu T}\mu^2T h+O(h^2),
+    \label{eq:gbm-weak-expansion}
+\end{equation}
+so the weak order is one.  If $\mu=0$, however, this bias is exactly zero at
+every step size, and $\varphi(s)=s$ cannot reveal a nonzero weak-convergence
+slope.
+
+A variance-reduced Monte Carlo estimate uses the exact and numerical values
+from the same path.  Define
+\[
+    B_m^A(h)=S_N^{A,(m)}-S_T^{(m)},
+    \qquad
+    \widehat\delta_A(h)=\frac1M\sum_{m=1}^{M}B_m^A(h).
+\]
+The signed interval
+\begin{equation}
+    \widehat\delta_A(h)
+       \ \pm\ 1.96\frac{s_{B^A}(h)}{\sqrt M}
+    \label{eq:gbm-weak-ci}
+\end{equation}
+must be examined before $|\widehat\delta_A(h)|$ is placed on a logarithmic
+axis.  If this interval contains zero, sampling noise can determine the apparent
+slope.  Formula \eqref{eq:gbm-exact-weak-bias} provides an independent check of
+the Monte Carlo implementation.
+
+\subsubsection{Terminal distribution and exact moments}
+
+Since $W_T\sim\mathcal{N}(0,T)$, equation
+\eqref{eq:gbm-exact-solution} implies
+\begin{equation}
+    \log S_T\sim\mathcal{N}\!\left(
+       \log S_0+\left(\mu-\frac12\sigma^2\right)T,
+       \sigma^2T
+    \right).
+    \label{eq:gbm-lognormal}
+\end{equation}
+Thus, for $s>0$, the exact density is
+\begin{equation}
+    f_{S_T}(s)
+      =\frac{1}{s\sigma\sqrt{2\pi T}}
+       \exp\!\left[
+         -\frac{\left(\log(s/S_0)-
+         (\mu-\tfrac12\sigma^2)T\right)^2}{2\sigma^2T}
+       \right],
+    \label{eq:gbm-density}
+\end{equation}
+and its $p$-quantile is
+\begin{equation}
+    Q_{S_T}(p)=S_0\exp\!\left[
+       \left(\mu-\frac12\sigma^2\right)T
+       +\sigma\sqrt{T}\,\Phi^{-1}(p)
+    \right],
+    \label{eq:gbm-quantile}
+\end{equation}
+where $\Phi$ is the standard normal distribution function.
+
+For a normal random variable $Y\sim\mathcal{N}(0,T)$,
+$\mathbb{E}[e^{aY}]=e^{a^2T/2}$.  Applying this identity to
+\eqref{eq:gbm-exact-solution} gives
+\begin{align}
+    \mathbb{E}[S_T]
+      &=S_0e^{(\mu-\sigma^2/2)T}
+        \mathbb{E}[e^{\sigma W_T}]
+        =S_0e^{\mu T},
+        \label{eq:gbm-mean}\\
+    \mathbb{E}[S_T^2]
+      &=S_0^2e^{2\mu T+\sigma^2T}.
+    \label{eq:gbm-second-moment}
+\end{align}
+Consequently,
+\begin{equation}
+    \operatorname{Var}(S_T)
+       =S_0^2e^{2\mu T}\left(e^{\sigma^2T}-1\right).
+    \label{eq:gbm-variance}
+\end{equation}
+Equations \eqref{eq:gbm-density}--\eqref{eq:gbm-variance} support three
+separate checks: a density-normalised histogram against the exact density,
+empirical against exact quantiles, and sample against exact moments.  Agreement
+of the mean alone does not establish that the variance or full distribution is
+correct.
+
+\subsubsection{Optional positivity analysis}
+\label{subsubsec:gbm-positivity}
+
+The exact GBM solution is strictly positive, whereas each numerical method
+multiplies its current value by a random factor.  Writing
+$\Delta W_n=\sqrt h\,Z$ with $Z\sim\mathcal{N}(0,1)$, the Euler--Maruyama factor
+is
+\[
+    F_{\mathrm{EM}}=1+\mu h+\sigma\sqrt h\,Z.
+\]
+It is negative with one-step probability
+\begin{equation}
+    p_{\mathrm{EM}}(h)
+      =\Phi\!\left(-\frac{1+\mu h}{\sigma\sqrt h}\right)>0
+    \label{eq:em-negativity}
+\end{equation}
+for every $h>0$ and $\sigma>0$, although the probability can be extremely
+small for fine steps.
+
+For Milstein,
+\[
+    F_{\mathrm{Mil}}
+      =1+\mu h+\sigma\sqrt h\,Z
+        +\frac12\sigma^2h(Z^2-1).
+\]
+This upward-opening quadratic has its minimum at
+$Z_*=-1/(\sigma\sqrt h)$, where
+\[
+    F_{\min}=\frac{1+(2\mu-\sigma^2)h}{2}.
+\]
+It therefore has a positive probability of becoming negative if and only if
+$(\sigma^2-2\mu)h>1$.  In that case, let
+\[
+    r=\sqrt{(\sigma^2-2\mu)h-1},
+    \qquad
+    z_- =\frac{-1-r}{\sigma\sqrt h},
+    \qquad
+    z_+ =\frac{-1+r}{\sigma\sqrt h}.
+\]
+Then
+\begin{equation}
+    p_{\mathrm{Mil}}(h)=\Phi(z_+)-\Phi(z_-),
+    \label{eq:milstein-negativity}
+\end{equation}
+while $p_{\mathrm{Mil}}(h)=0$ when
+$(\sigma^2-2\mu)h\leq1$.  With independent update factors, the probability of
+at least one negative factor in $N$ steps is $1-(1-p)^N$.  A numerical study
+must state whether it records this path event or only a negative terminal
+value, since the two events are different.
+
+\subsection{Non-affine stochastic-volatility model}
+\label{subsec:nonaffine-theory}
+
+GBM is valuable for validation but does not require time discretisation because
+of its exact transition.  The second model introduces a stochastic volatility
+factor $Y_t$ and is written in terms of the log-price $X_t=\log S_t$:
+\begin{equation}
+    dX_t
+      =\left(\mu-\frac12g(Y_t)^2\right)dt
+        +g(Y_t)dW_t^{(1)}.
+    \label{eq:nonaffine-x}
+\end{equation}
+The volatility factor follows
+\begin{equation}
+    dY_t
+      =\kappa(\theta-Y_t)dt
+        +\xi\sqrt{1+Y_t^2}\,dW_t^{(2)}.
+    \label{eq:nonaffine-y}
+\end{equation}
+The instantaneous asset volatility is the bounded logistic function
+\begin{equation}
+    g(y)
+      =\sigma_{\min}
+        +\frac{\sigma_{\max}-\sigma_{\min}}{1+e^{-y}}.
+    \label{eq:nonaffine-g}
+\end{equation}
+The driving Brownian motions satisfy
+\begin{equation}
+    d\langle W^{(1)},W^{(2)}\rangle_t=\rho\,dt.
+    \label{eq:nonaffine-correlation}
+\end{equation}
+Here $0<\sigma_{\min}<\sigma_{\max}$, $\kappa,\xi>0$, and
+$|\rho|<1$.  Because the logistic fraction lies strictly between zero and one,
+$\sigma_{\min}<g(y)<\sigma_{\max}$ for every finite $y$.  Thus asset
+volatility remains positive and bounded.  The state-dependent diffusion
+$\xi\sqrt{1+Y_t^2}$ makes the joint model non-affine, and no exact transition
+law is supplied for this model.
+
+The reproducible benchmark is
+\begin{align}
+    S_0&=100, & X_0&=\log 100, \notag\\
+    Y_0&=0, & T&=1, \notag\\
+    \mu&=0.05, & \kappa&=2, \notag\\
+    \theta&=-0.2, & \xi&=0.6, \notag\\
+    \rho&=-0.7, & \sigma_{\min}&=0.10, \notag\\
+    \sigma_{\max}&=0.50.
+    \label{eq:nonaffine-parameters}
+\end{align}
+
+\subsubsection{Correlated Brownian increments}
+
+At every step, let $Z_{1,n}$ and $Z_{2,n}$ be independent
+$\mathcal{N}(0,1)$ random variables.  The first increment is
+\begin{equation}
+    \Delta W_n^{(1)}=\sqrt h\,Z_{1,n}.
+    \label{eq:correlated-w1}
+\end{equation}
+The correlated second increment is
+\begin{equation}
+    \Delta W_n^{(2)}=\sqrt h\left(
+       \rho Z_{1,n}+\sqrt{1-\rho^2}\,Z_{2,n}
+    \right).
+    \label{eq:correlated-w2}
+\end{equation}
+Both increments have mean zero, and independence gives
+\begin{align}
+    \operatorname{Var}(\Delta W_n^{(1)})&=h,\\
+    \operatorname{Var}(\Delta W_n^{(2)})&=h,\\
+    \operatorname{Cov}(\Delta W_n^{(1)},\Delta W_n^{(2)})
+      &=h\rho.
+\end{align}
+Therefore their correlation is $\rho$, as required by
+\eqref{eq:nonaffine-correlation}.
+
+\subsubsection{Euler--Maruyama discretisation}
+
+Freezing the coefficients at the left endpoint first gives the log-price
+update
+\begin{equation}
+    X_{n+1}
+      =X_n+\left(\mu-\frac12g(Y_n)^2\right)h
+        +g(Y_n)\Delta W_n^{(1)}.
+    \label{eq:nonaffine-em-x}
+\end{equation}
+The volatility-factor update is
+\begin{equation}
+    Y_{n+1}
+      =Y_n+\kappa(\theta-Y_n)h
+        +\xi\sqrt{1+Y_n^2}\,\Delta W_n^{(2)}.
+    \label{eq:nonaffine-em-y}
+\end{equation}
+Finally, the price approximation is recovered from
+\begin{equation}
+    S_{n+1}=e^{X_{n+1}}.
+    \label{eq:nonaffine-em-s}
+\end{equation}
+Substitution of \eqref{eq:correlated-w1}--\eqref{eq:correlated-w2} into
+\eqref{eq:nonaffine-em-x}--\eqref{eq:nonaffine-em-y} gives the implementable
+scheme used for the non-affine experiment.
+
+\subsubsection{Strong convergence with a fine reference}
+\label{subsubsec:nested-coupling}
+
+Because no exact terminal solution is available, a fine Euler--Maruyama path
+serves as a numerical reference.  The coarse and fine paths must represent the
+same underlying Brownian trajectory.  Let $h=Rh_{\mathrm{ref}}$ for an integer
+$R$, and generate independent fine-grid increments
+\begin{equation}
+    \Delta B_{i,j}=\sqrt{h_{\mathrm{ref}}}\,Z_{i,j},
+    \qquad i\in\{1,2\}.
+    \label{eq:fine-independent-increments}
+\end{equation}
+For coarse interval $n$, sum the corresponding fine increments:
+\begin{equation}
+    \Delta B_{i,n}^{(h)}
+       =\sum_{j=nR}^{(n+1)R-1}\Delta B_{i,j}.
+    \label{eq:coarse-independent-sum}
+\end{equation}
+Each sum is normal with variance $Rh_{\mathrm{ref}}=h$.  At both resolutions,
+construct the first driving increment as
+\begin{equation}
+    \Delta W^{(1)}=\Delta B_1.
+    \label{eq:nested-w1}
+\end{equation}
+Construct the second driving increment separately as
+\begin{equation}
+    \Delta W^{(2)}
+      =\rho\Delta B_1+\sqrt{1-\rho^2}\,\Delta B_2.
+    \label{eq:correlation-from-independent-streams}
+\end{equation}
+This preserves variance $h$, covariance $\rho h$, and the underlying Brownian
+path across resolutions.
+
+For path $m$, define the terminal pathwise difference
+\begin{equation}
+    A_m(h)=\left|S_T^{(h,m)}-S_T^{(h_{\mathrm{ref}},m)}\right|.
+    \label{eq:nonaffine-pathwise-difference}
+\end{equation}
+The empirical strong refinement difference is
+\begin{equation}
+    \widehat e_{\mathrm{s,ref}}(h)
+      =\frac1M\sum_{m=1}^{M}A_m(h).
+    \label{eq:nonaffine-strong-estimator}
+\end{equation}
+Its standard error is
+\begin{equation}
+    \operatorname{SE}\bigl(\widehat e_{\mathrm{s,ref}}(h)\bigr)
+      =\frac{s_A(h)}{\sqrt M}.
+    \label{eq:nonaffine-strong-se}
+\end{equation}
+An approximate $95\%$ confidence interval is
+\begin{equation}
+    \widehat e_{\mathrm{s,ref}}(h)
+      \ \pm\ 1.96\frac{s_A(h)}{\sqrt M}.
+    \label{eq:nonaffine-strong-ci}
+\end{equation}
+Unlike \eqref{eq:gbm-strong-estimator}, this is not an exact-error estimator:
+both terms are discretised.  Its observed log--log slope must therefore be
+described as empirical.  The experiment should be repeated with at least one
+finer reference, such as $h_{\mathrm{ref}}/2$, before a rate is reported.
+
+\subsubsection{Weak convergence of a payoff}
+
+For the project payoff, take
+\begin{equation}
+    \varphi(s)=(s-K)^+ =\max(s-K,0),
+    \qquad K=100.
+    \label{eq:call-payoff}
+\end{equation}
+Using common random numbers on the coarse and fine paths, form the paired
+difference
+\begin{equation}
+    P_m(h)=\varphi(S_T^{(h,m)})
+       -\varphi(S_T^{(h_{\mathrm{ref}},m)}).
+    \label{eq:nonaffine-payoff-difference}
+\end{equation}
+The signed estimated weak refinement bias is
+\begin{equation}
+    \widehat\delta_{\varphi}(h)=\frac1M\sum_{m=1}^{M}P_m(h).
+    \label{eq:nonaffine-weak-estimator}
+\end{equation}
+Its approximate $95\%$ confidence interval is
+\begin{equation}
+    \widehat\delta_{\varphi}(h)
+       \ \pm\ 1.96\frac{s_P(h)}{\sqrt M}.
+    \label{eq:nonaffine-weak-ci}
+\end{equation}
+Common random numbers often reduce $s_P$ because the two payoff values move
+together.  Nevertheless, if this interval includes zero or has width
+comparable to $|\widehat\delta_{\varphi}(h)|$, the apparent weak-convergence
+slope is dominated by sampling uncertainty and should not be reported.
+
+The reconstruction \eqref{eq:nonaffine-em-s} keeps every finite numerical price
+positive.  Because this model has two correlated noises, the scalar Milstein
+order-one result from GBM should not be applied to it; the required extension
+here is the Euler--Maruyama strong and weak refinement study above.
+
+\subsection{Connection between theory and numerical evidence}
+\label{subsec:theory-evidence-map}
+
+Table~\ref{tab:theory-evidence} summarises how the mathematical results should
+be used by the numerical and validation parts of the project.  The central
+distinction is that GBM has an exact pathwise benchmark, whereas agreement
+between two non-affine discretisations supplies evidence whose reliability
+depends on reference refinement and quantified sampling error.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{@{}p{0.25\textwidth}p{0.31\textwidth}p{0.34\textwidth}@{}}
+        \toprule
+        Mathematical result & Required numerical evidence & Interpretation \\
+        \midrule
+        GBM strong orders $1/2$ and $1$
+          & Coupled exact, EM, and Milstein paths; log--log errors with fitted slopes and path count
+          & Direct time-discretisation error because the reference is exact \\
+        GBM weak order $1$
+          & Signed paired bias, confidence intervals, and comparison with \eqref{eq:gbm-exact-weak-bias}
+          & A slope is meaningful only above the Monte Carlo noise floor \\
+        Exact GBM law and moments
+          & Density-normalised histogram, quantiles, sample mean, and sample variance
+          & Tests distributional accuracy in addition to the mean \\
+        Non-affine nested refinement
+          & Coupled coarse and fine paths; two successively finer reference grids
+          & Measures numerical refinement differences rather than exact errors \\
+        Non-affine payoff expectation
+          & Paired payoff differences and confidence intervals
+          & Common random numbers reduce variance; uncertainty still limits slope fitting \\
+        \bottomrule
+    \end{tabular}
+    \caption{Relationship between the Direction~4 theory and the evidence required from the numerical experiments.}
+    \label{tab:theory-evidence}
+\end{table}
