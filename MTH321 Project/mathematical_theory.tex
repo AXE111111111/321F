@@ -215,6 +215,15 @@ so the weak order is one.  If $\mu=0$, however, this bias is exactly zero at
 every step size, and $\varphi(s)=s$ cannot reveal a nonzero weak-convergence
 slope.
 
+The numerical EM fit below uses $N=2,4,8,16,32,64$, including the coarse
+step $h=1/2$.  The $O(h^2)$ curvature in
+\eqref{eq:gbm-weak-expansion} makes the log--log slope of the \emph{exact}
+bias \eqref{eq:gbm-exact-weak-bias} equal to about $0.9956$ on those six
+grids (about $0.9982$ on $N=8,16,32,64$).  A Monte Carlo fitted slope near
+$1.0100$ is compatible with this first-order prediction; it is not a rate
+better than the theoretical order.  The two coarse grids are retained, and
+sampling uncertainty is quantified separately.
+
 A variance-reduced Monte Carlo estimate uses the exact and numerical values
 from the same path.  Define
 \[
@@ -335,9 +344,15 @@ Then
 \end{equation}
 while $p_{\mathrm{Mil}}(h)=0$ when
 $(\sigma^2-2\mu)h\leq1$.  With independent update factors, the probability of
-at least one negative factor in $N$ steps is $1-(1-p)^N$.  A numerical study
-must state whether it records this path event or only a negative terminal
-value, since the two events are different.
+at least one negative factor in $N$ steps is $1-(1-p)^N$.  This path event
+differs from a negative terminal value because a second negative factor can
+restore a positive sign.  The optional empirical positivity experiment is
+not performed here.  Under the benchmark parameters,
+$\sigma^2-2\mu=-0.06<0$ makes $p_{\mathrm{Mil}}(h)=0$ on every grid, while
+$p_{\mathrm{EM}}(1/2)\simeq2.12\times10^{-13}$ at the coarsest grid.  Even
+two million two-step paths have fewer than $10^{-6}$ expected negative-factor
+events, so the benchmark cannot resolve a nonzero EM rate by simulation.
+Only the analytic probabilities are reported.
 
 \subsection{Non-affine stochastic-volatility model}
 \label{subsec:nonaffine-theory}
@@ -438,6 +453,32 @@ Finally, the price approximation is recovered from
 Substitution of \eqref{eq:correlated-w1}--\eqref{eq:correlated-w2} into
 \eqref{eq:nonaffine-em-x}--\eqref{eq:nonaffine-em-y} gives the implementable
 scheme used for the non-affine experiment.
+
+\subsubsection{Regularity and the expected strong rate}
+
+The regularity of the state equation gives a useful benchmark for the
+refinement study.  The derivatives of its nonlinear diffusion coefficients
+satisfy
+\begin{equation}
+    |g'(y)|\leq\frac{\sigma_{\max}-\sigma_{\min}}{4},
+    \qquad
+    \left|\frac{d}{dy}\left(\xi\sqrt{1+y^2}\right)\right|
+      =\frac{\xi|y|}{\sqrt{1+y^2}}\leq\xi.
+    \label{eq:nonaffine-lipschitz-bounds}
+\end{equation}
+The $X$-drift is bounded and globally Lipschitz because $g$ is bounded and
+Lipschitz; the $Y$-drift is affine.  Expressing the correlated drivers through
+two independent Brownian motions therefore gives globally Lipschitz
+coefficients with at most linear growth for the state vector $(X,Y)$.
+The standard Euler--Maruyama theorem consequently predicts strong order
+$1/2$ for that state vector over a fixed finite time interval.  The plotted
+quantity is instead a difference of reconstructed prices $S=e^X$ against a
+\emph{numerical} reference.  Since exponentiation is not globally Lipschitz,
+the state-vector theorem alone is not an exact-error or order proof for this
+price statistic; its observed slope is still described as empirical.
+Likewise, the call payoff in \eqref{eq:call-payoff} has a kink, so a weak
+order-one claim for that payoff requires additional regularity arguments and
+cannot be inferred from these Lipschitz bounds alone.
 
 \subsubsection{Strong convergence with a fine reference}
 \label{subsubsec:nested-coupling}
