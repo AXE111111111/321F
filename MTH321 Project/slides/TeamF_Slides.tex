@@ -17,6 +17,9 @@
   \end{columns}}
 \newlength{\figH}\setlength{\figH}{47mm}% all four figures at one height (same scale, same font size)
 \newlength{\figtextdrop}\setlength{\figtextdrop}{0.3mm}
+% series colours = figure colours (slide_rcparams.py: ACCENT #23426B navy, RED #B03A2E brick); label cells only
+\definecolor{figNavy}{HTML}{23426B}\definecolor{figRed}{HTML}{B03A2E}
+\newcommand{\serA}[1]{{\color{figNavy}#1}}\newcommand{\serB}[1]{{\color{figRed}#1}}
 \newcommand{\slopetab}[1]{\begin{tabular}{@{}l@{\hspace{1.1em}}l@{}}#1\end{tabular}}
 \newcommand{\idfig}{\fontfamily{pplx}\itshape}   % student IDs: Palatino italic, lining (equal-height, tabular) figures
 \input{generated/macros.tex}
@@ -160,7 +163,7 @@ must be measured with a nonlinear payoff, here the call $(S_T-100)^+$.
 {Strong error against the exact coupled path, $M=2\times10^6$. Filled points ($N\ge64$) fitted; $95\%$ bars within
 markers; dashed: slopes $\tfrac12$ and~$1$.}
 {Fitted slopes, $\pm$ one jackknife SE:\par\vspace{0.4em}
-\slopetab{Euler--Maruyama & $0.4991\pm0.0004$\\ Milstein & $0.9979\pm0.0002$}\colgap
+\slopetab{\serA{Euler--Maruyama} & $0.4991\pm0.0004$\\ \serB{Milstein} & $0.9979\pm0.0002$}\colgap
 Local orders rise monotonically to $\emLocalOrderFine$ and $\milLocalOrderFine$; at $h=1/512$ Milstein is about $60\times$
 more accurate.\colgap
 The coarse-grid deficit is pre-asymptotic curvature, so only $N\ge64$ is fitted; the small gap to $\tfrac12$ and $1$ is
@@ -175,8 +178,8 @@ finite-grid curvature, which the SE does not measure.}% content: report Sec. 4.1
 {Top: absolute bias and analytic $|\delta(h)|$; bottom: signed bias with $95\%$ intervals. Filled points fitted;
 markers offset horizontally for visibility.}
 {Weak slopes:\par\vspace{0.4em}
-\slopetab{Euler--Maruyama & $1.0100\pm0.0440$\\ & {\color{muted}\footnotesize $N=2$--$64$}\\[0.15em]
-Milstein & $0.9981\pm0.0004$\\ & {\color{muted}\footnotesize $N=2$--$512$}}\colgap
+\slopetab{\serA{Euler--Maruyama} & $1.0100\pm0.0440$\\ & {\color{muted}\footnotesize $N=2$--$64$}\\[0.15em]
+\serB{Milstein} & $0.9981\pm0.0004$\\ & {\color{muted}\footnotesize $N=2$--$512$}}\colgap
 All $\analyticInCI$ signed intervals contain $\delta(h)$.\colgap
 At $N=256$, moments and all ten quantile intervals agree with the exact law within Monte Carlo error.}
 \end{frame}
@@ -190,7 +193,7 @@ At $N=256$, moments and all ten quantile intervals agree with the exact law with
 {Coupled discrepancy to Euler--Maruyama references, $M=5\times10^4$. All points fitted, offset
 horizontally; $95\%$ bars within markers; dashed: slope~$\tfrac12$.}
 {Slopes on $N=32$--$512$:\par\vspace{0.4em}
-\slopetab{ref.\ $4096$ & $0.5205\pm0.0019$\\ ref.\ $8192$ & $0.5090\pm0.0018$}\colgap
+\slopetab{\serA{ref.\ $4096$} & $0.5205\pm0.0019$\\ \serB{ref.\ $8192$} & $0.5090\pm0.0018$}\colgap
 Local orders rise at the finest grids (to $0.558$ against $4096$, $0.530$ against $8192$): a reference only $8\times$
 finer shares part of the coarse error, so the finer reference is closer to~$\tfrac12$.\colgap% content: report Sec. 4.4, Table 6
 The references differ by $\refGap\pm\refGapSE$ ($\refRatio\%$ of the value at $N=512$): these are discrepancies, not exact
