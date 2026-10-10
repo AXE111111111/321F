@@ -12,7 +12,7 @@ from config import GBMConfig, NonAffineConfig, SEED
 from gbm import (gbm_analytic_bias, gbm_em_terminal, gbm_exact_mean,
                  gbm_exact_terminal, gbm_exact_variance, gbm_milstein_terminal)
 from nonaffine import nonaffine_em_terminal
-from random_paths import aggregate_increments, correlate_increments, normal_increments
+from random_paths import coarsen_increments, correlate_increments, normal_increments
 from statistics import RunningStats, fit_loglog_slope, jackknife_slope_se, weak_fit_eligible
 
 
@@ -80,8 +80,14 @@ def _fit_rows(rows: list[dict[str, object]], group_keys: tuple[str, ...],
 
 
 def run_gbm(cfg: GBMConfig, output: Path, seed: int = SEED) -> dict[str, Path]:
-    """One master fine Brownian stream per batch drives all GBM grids."""
-    if any(cfg.fine_steps % n for n in cfg.grids) or cfg.distribution_steps not in cfg.grids:
+    """Use the same master paths for strong errors and paired weak biases.
+
+    By default, N=2,4,...,512 and h=T/N. Each grid is block-summed directly
+    from the 512-step master; the exact terminal value uses that same master.
+    Keep batch draws and grid iteration in their declared order for reproducibility.
+    """
+    if (cfg.fine_steps < 1 or any(n < 1 or cfg.fine_steps % n for n in cfg.grids)
+            or cfg.distribution_steps not in cfg.grids):
         raise ValueError("GBM grids must nest in fine grid")
     rng = np.random.default_rng(np.random.SeedSequence(seed).spawn(2)[0])
     strong = {(method, n): RunningStats() for method in ("EM", "Milstein") for n in cfg.grids}
@@ -97,7 +103,7 @@ def run_gbm(cfg: GBMConfig, output: Path, seed: int = SEED) -> dict[str, Path]:
         exact = gbm_exact_terminal(cfg.s0, cfg.mu, cfg.sigma, cfg.t, fine)
         for n in cfg.grids:
             h = cfg.t / n
-            dw = aggregate_increments(fine, cfg.fine_steps // n)
+            dw = coarsen_increments(fine, n)
             values = {"EM": gbm_em_terminal(cfg.s0, cfg.mu, cfg.sigma, h, dw),
                       "Milstein": gbm_milstein_terminal(cfg.s0, cfg.mu, cfg.sigma, h, dw)}
             for method, terminal in values.items():
@@ -245,9 +251,18 @@ class IncrementMoments:
 
 
 def run_nonaffine(cfg: NonAffineConfig, output: Path, seed: int = SEED) -> dict[str, Path]:
-    """Both references and every coarse path descend from two 8192-step masters."""
-    grids = tuple(dict.fromkeys((*cfg.grids, *cfg.references)))
-    if any(cfg.fine_steps % n for n in grids) or cfg.references[-1] != cfg.fine_steps:
+    """Share coarse/reference paths for strong and call-payoff weak differences.
+
+    Defaults: N=32,64,...,512, references 4096/8192, and h=T/N at every level.
+    Draw two independent 8192-step masters per batch (b1 then b2). Coarsen
+    each directly before correlating, so both experiments retain identical
+    paths, random-number consumption and floating-point operation order.
+    """
+    # Coarse levels first, then references, retaining their configured order.
+    # A level shared by both roles is simulated only once.
+    simulation_grids = tuple(dict.fromkeys((*cfg.grids, *cfg.references)))
+    if (cfg.fine_steps < 1 or any(n < 1 or cfg.fine_steps % n for n in simulation_grids)
+            or not cfg.references or cfg.references[-1] != cfg.fine_steps):
         raise ValueError("non-affine grids and references must nest in master grid")
     rng = np.random.default_rng(np.random.SeedSequence(seed).spawn(2)[1])
     strong = {(ref, n): RunningStats() for ref in cfg.references for n in cfg.grids}
@@ -257,22 +272,22 @@ def run_nonaffine(cfg: NonAffineConfig, output: Path, seed: int = SEED) -> dict[
     batch_counts: list[int] = []
     ref_strong = RunningStats()
     ref_weak = RunningStats()
-    diagnostics = {n: IncrementMoments() for n in grids}
+    diagnostics = {n: IncrementMoments() for n in simulation_grids}
     validity = {n: {"finite_X": 0, "finite_Y": 0, "finite_S": 0,
-                    "nonpositive_S": 0, "total_paths": 0} for n in grids}
+                    "nonpositive_S": 0, "total_paths": 0} for n in simulation_grids}
     for start in range(0, cfg.paths, cfg.batch_size):
         batch = min(cfg.batch_size, cfg.paths - start)
         batch_counts.append(batch)
         b1 = normal_increments(rng, batch, cfg.fine_steps, cfg.t)
         b2 = normal_increments(rng, batch, cfg.fine_steps, cfg.t)
         terminals: dict[int, np.ndarray] = {}
-        for n in grids:
-            ratio = cfg.fine_steps // n
-            a1 = aggregate_increments(b1, ratio)
-            a2 = aggregate_increments(b2, ratio)
+        for n in simulation_grids:
+            h = cfg.t / n
+            a1 = coarsen_increments(b1, n)
+            a2 = coarsen_increments(b2, n)
             w1, w2 = correlate_increments(a1, a2, cfg.rho)
             diagnostics[n].add(w1, w2)
-            x, y, s = nonaffine_em_terminal(cfg, cfg.t / n, w1, w2)
+            x, y, s = nonaffine_em_terminal(cfg, h, w1, w2)
             counts = validity[n]
             counts["total_paths"] += batch
             counts["finite_X"] += int(np.count_nonzero(np.isfinite(x)))
@@ -315,9 +330,10 @@ def run_nonaffine(cfg: NonAffineConfig, output: Path, seed: int = SEED) -> dict[
               batch_counts=batch_counts)
     _fit_rows(weak_rows, ("reference_N",), "weak", batch_sums=weak_batch_sums,
               batch_counts=batch_counts)
-    diagnostic_rows = [{**common, **diagnostics[n].summary(n, cfg.t, cfg.rho, seed)} for n in grids]
+    diagnostic_rows = [{**common, **diagnostics[n].summary(n, cfg.t, cfg.rho, seed)}
+                       for n in simulation_grids]
     validity_rows = [{**common, "N": n, "h": cfg.t / n, "M": cfg.paths, **validity[n]}
-                     for n in grids]
+                     for n in simulation_grids]
     finest_coarse = max(cfg.grids)
     coarse_ref, fine_ref = cfg.references
     fine_ref_difference = strong[(fine_ref, finest_coarse)].mean

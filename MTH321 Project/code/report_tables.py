@@ -99,7 +99,7 @@ def main() -> None:
     (out / "tab_gbm_weak_order.tex").write_text(table(
         r"GBM signed mean bias $\widehat\delta(h)\pm1$ SE (paired with the exact path) and the analytic bias "
         r"$\delta(h)$ of~\eqref{eq:analytic-bias}; the last column is the local order $\log_2(\delta(2h)/\delta(h))$ of the analytic bias. "
-        r"$^\circ$: EM grid failing the predeclared resolution rule (not fitted). Source: \texttt{results/gbm\_weak.csv}.",
+        r"$^\circ$: EM grid failing the team's resolution rule (excluded from the fit; its interval may still exclude zero). Source: \texttt{results/gbm\_weak.csv}.",
         "tab:gbm-weak-order",
         r"$N$ & EM $\widehat\delta$ & Milstein $\widehat\delta$ & Analytic $\delta$ & Order of $\delta$",
         body, "@{}rrrrr@{}"))
@@ -269,8 +269,9 @@ def main() -> None:
         body.append(f"{float(pr):.2f} & {f(float(e['exact_quantile']),4)} & ${f(float(e['estimate']),4)}\\pm{f(float(e['se_quantile']),4)}$ & "
                     f"${f(float(m_['estimate']),4)}\\pm{f(float(m_['se_quantile']),4)}$")
     (out / "tab_quantiles.tex").write_text(table(
-        r"Numerical terminal quantiles at $N=256$ ($\pm1$ asymptotic SE using the exact lognormal density at the exact quantile) against~\eqref{eq:quantile}. "
-        rf"{inside} of {2*len(probs)} approximate 95\% intervals contain the exact quantile. Source: \texttt{{results/gbm\_distribution.csv}}.",
+        r"Numerical terminal quantiles at $N=256$ against~\eqref{eq:quantile}; $\pm1$ SE is an exact-law-based approximation (asymptotic quantile SE "
+        r"with the exact lognormal density at the exact quantile in place of the unknown density of the numerical law), so the intervals are approximate, not calibrated. "
+        rf"{inside} of {2*len(probs)} such approximate 95\% intervals contain the exact quantile. Source: \texttt{{results/gbm\_distribution.csv}}.",
         "tab:quantiles", r"$p$ & Exact & EM & Milstein", body, "@{}cccc@{}"))
     mac("quantInside", str(inside)); mac("quantTotal", str(2 * len(probs)))
 
