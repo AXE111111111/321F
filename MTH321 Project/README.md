@@ -30,9 +30,8 @@ validation replace the deterministic stability/adaptivity tasks.
 | `slides/` | Talk LaTeX source `TeamF_Slides.tex` + `polish_preamble.tex`, the compiled `TeamF_Slides.pdf`, `generated/macros.tex` (number macros written by `code/report_tables.py`), `make_slide_figures.py` + `slide_rcparams.py` (draw the four slide figures from `results/*.csv`), `figures/` (the four slide figures and the XJTLU crest `xjtlu_crest.pdf`/`.svg`) |
 | `docs/` | Team-supplied internal documents (uploaded in commit `8f4e1f0`, 2026-09-26; authorship to be confirmed by the team; not course material): `Direction_4_Coding_Implementation_Guide.pdf`, `GBM_Part_I_Mathematical_Guide.pdf`, `NonAffine_EM_Derivation.pdf` |
 
-Course materials (brief, problem pack, role cards) are not included in this package. (The GitHub repository folder
-`MTH321 Project/` still contains `ODE_IVP_Project_Brief.pdf`, `problem_pack.pdf` and `role_cards.pdf`; whether to keep
-them there is a team decision.)
+Course materials (project brief, problem pack, role cards) are not redistributed in this package; refer to the
+module page for them.
 
 ## Environment
 
