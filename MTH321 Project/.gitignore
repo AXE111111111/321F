@@ -5,3 +5,14 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 /tmp/
+# LaTeX build artefacts (report/, slides/)
+*.aux
+*.log
+*.out
+*.nav
+*.snm
+*.toc
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz

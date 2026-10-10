@@ -1,0 +1,314 @@
+% MTH321 Project 1, Direction 4 (Financial SDE) -- Team F talk.
+% Build (from slides/): latexmk -pdf TeamF_Slides.tex    Figures: python make_slide_figures.py (reads ../results/*.csv)
+% Numbers: generated/macros.tex (written by ../code/report_tables.py; same macros as the report) and the report tables / CSVs.
+\documentclass[aspectratio=169,10pt,t]{beamer}
+\input{polish_preamble}
+\graphicspath{{figures/}}
+\newcommand{\E}{\mathbb{E}}
+% figure frame: figure (natural size, as drawn) and caption left, text right; tops aligned
+\newcommand{\figframe}[3]{%
+  \begin{columns}[T,onlytextwidth]
+  \column{0.49\textwidth}
+    \includegraphics[height=\figH]{#1}\par\vspace{1.2mm}
+    {\raggedright\figcap{#2}\par}
+  \column{0.05\textwidth}
+  \column{0.46\textwidth}\raggedright\vspace{\figtextdrop}
+    #3
+  \end{columns}}
+\newlength{\figH}\setlength{\figH}{47mm}% all four figures at one height (same scale, same font size)
+\newlength{\figtextdrop}\setlength{\figtextdrop}{0.3mm}
+\newcommand{\slopetab}[1]{\begin{tabular}{@{}l@{\hspace{1.1em}}l@{}}#1\end{tabular}}
+\newcommand{\idfig}{\fontfamily{pplx}\itshape}   % student IDs: Palatino italic, lining (equal-height, tabular) figures
+\input{generated/macros.tex}
+\title{Numerical solution and validation of financial SDEs}
+\hypersetup{pdftitle={Numerical solution and validation of financial SDEs},
+  pdfauthor={Team F: Kunze Li, Che Li, Zekun Wang, Yixuan Liu, Yawen Wu, Ruitong Huang},
+  pdfsubject={MTH321 Project 1, Direction 4: Financial SDE},
+  pdfkeywords={Euler-Maruyama, Milstein, geometric Brownian motion, non-affine stochastic volatility, log-Euler}}
+
+\begin{document}
+\section{Setting}
+% =========================================================== 1  cover
+% Cover page number: the frame is [plain] (no footline, so the title block keeps its
+% vertical balance); "1 / 14" is drawn on the background layer with exactly the
+% footline's font, colour and geometry (right margin 8mm, 3.6mm above the bottom edge).
+{\setbeamertemplate{background}{\vbox to \paperheight{\vfill
+  \usebeamerfont{footline}\usebeamercolor[fg]{footline}%
+  \hbox to \paperwidth{\hfill\llap{\insertframenumber\,/\,\inserttotalframenumber}\hskip 8mm}\vskip 3.6mm}}
+% XJTLU crest (shield only), vector PDF: figures/xjtlu_crest.pdf (+ .svg).
+%   Source: official XJTLU logo SVG on xjtlu.edu.cn,
+%     https://www.xjtlu.edu.cn/wp-content/uploads/2024/01/cn-footer-logo-light.svg
+%   as used on https://www.xjtlu.edu.cn/en/about/overview/xjtlu-identity .
+%   Shield paths extracted unchanged; the reversed-out (light) colours were swapped
+%   to the positive navy shield (#010544) with white charges, as in the official
+%   logo on that page. Converted SVG -> PDF with rsvg-convert (vector, no raster).
+%   Licence: the XJTLU logo is a registered trademark of Xi'an Jiaotong-Liverpool
+%   University (see https://www.xjtlu.edu.cn/en/about/brand-resources); used here
+%   only to identify the institution on a non-commercial student coursework talk.
+% Placement: height 14mm, right edge on the 8mm right margin, top aligned with the
+% small-cap height of the cover's top text line.
+\newlength{\crestcap}
+\begin{frame}[plain]
+\vspace*{0pt plus 1filll}% block centred optically (top : bottom = 1 : 1.25)
+\hspace*{6mm}\begin{minipage}{0.86\textwidth}\raggedright
+{\color{note}\notesize\settoheight{\crestcap}{\textsc{mth}}%
+\leavevmode\rlap{\hspace*{\dimexpr\paperwidth-22mm\relax}\llap{\raisebox{\dimexpr\crestcap-14mm\relax}[0pt][0pt]{\includegraphics[height=14mm]{xjtlu_crest}}}}%
+\textsc{mth321}\ \textperiodcentered\ \textsc{project 1}\ \textperiodcentered\ \textsc{direction 4: financial sde}}\par\vspace{5mm}
+{\color{accent}\fontsize{13}{16.5}\selectfont Numerical solution and validation of financial SDEs\par}\vspace{1.6mm}
+{\itshape Geometric Brownian motion and a non-affine stochastic-volatility model\par}\vspace{3.5mm}
+{\color{hairline}\rule{0.42\textwidth}{0.4pt}}\par\vspace{3.2mm}
+{\textsc{Team F}}\par\vspace{1.6mm}
+{\small
+\begin{tabular}{@{}l@{\hspace{1.6em}}>{\idfig}l@{\hspace{1.6em}}>{\color{note}\itshape}l@{}}
+{\color{note}\footnotesize\textsc{member}} & {\normalfont\color{note}\footnotesize\textsc{student id}} & {\upshape\footnotesize\textsc{role}}\\[0.25em]
+Kunze Li & 2363973 & Project Manager\\
+Che Li & 2362072 & Algorithm Implementation\\
+Zekun Wang & 2363718 & Validation \& Visualization\\
+Yixuan Liu & 2361140 & Testing \& Validation\\
+Yawen Wu & 2360749 & Mathematical Theory\\
+Ruitong Huang & 2360294 & Visualization \& Report\\
+\end{tabular}}\par\vspace{4mm}
+{\color{accent}\footnotesize Xi'an Jiaotong-Liverpool University \textperiodcentered\ October 2026}\par
+\end{minipage}
+\vspace*{0pt plus 1.25filll}
+\end{frame}}
+
+% =========================================================== 2  questions
+\begin{frame}{Two questions, answered against two kinds of reference}
+\bodytop
+\begin{enumerate}\setlength{\itemsep}{0.8em}
+\item For geometric Brownian motion, whose exact solution is known, do coupled Monte~Carlo experiments recover the
+  theoretical strong and weak orders of Euler--Maruyama and Milstein once sampling uncertainty is quantified?
+\item For a non-affine stochastic-volatility model without an exact transition law, does Euler--Maruyama refine at half order
+  against nested numerical references, and can its weak payoff bias be resolved statistically?
+\end{enumerate}
+\vspace{2.2em}
+\hspace*{\leftmargini}\lead{Goal.}\ A trend counts only where it exceeds the Monte Carlo uncertainty.
+\closing{In Direction 4, stability regions and adaptive steps are replaced by the exact--EM--Milstein comparison, coupled strong and
+weak convergence, Monte Carlo confidence intervals and nested-grid validation; we add an analytic positivity analysis.}
+\end{frame}
+
+% =========================================================== 3  GBM schemes
+\begin{frame}{GBM: the exact solution and two one-step schemes}
+\bodytop\vspace{1.0mm}\vspace{-\abovedisplayskip}\vspace{-\baselineskip}
+\begin{align*}
+dS_t&=\mu S_t\,dt+\sigma S_t\,dW_t, & S_T&=S_0\exp\bigl[(\mu-\tfrac12\sigma^2)T+\sigma W_T\bigr],\\[0.2em]
+S^{\mathrm{EM}}_{n+1}&=S_n\bigl(1+\mu h+\sigma\Delta W_n\bigr), &
+S^{\mathrm{Mil}}_{n+1}&=S_n\bigl[1+\mu h+\sigma\Delta W_n+\tfrac12\sigma^2\bigl((\Delta W_n)^2-h\bigr)\bigr].
+\end{align*}
+Errors are measured on the same Brownian path,
+\[
+e_s(h)=\E\bigl|S^{(h)}_N-S_T\bigr|,\qquad e_w(h)=\bigl|\E S^{(h)}_N-\E S_T\bigr|,
+\]
+and theory predicts strong order $\tfrac12$ for Euler--Maruyama, $1$ for Milstein, and weak order $1$ for both.
+\closing{$S_0=100$, $\mu=0.05$, $\sigma=0.20$, $T=1$; $M=2\times10^6$ paths, seed $32104$; $N=2,4,\dots,512$; coarse
+increments are block sums of one $512$-step master path.}
+\end{frame}
+
+% =========================================================== 4  non-affine model
+\begin{frame}{A non-affine volatility model with non-commutative noise}
+\bodytop\vspace{1.8mm}\vspace{-\abovedisplayskip}\vspace{-\baselineskip}
+\begin{gather*}
+dX_t=\bigl(\mu-\tfrac12g(Y_t)^2\bigr)\,dt+g(Y_t)\,dW^{(1)}_t,\qquad
+dY_t=\kappa(\theta-Y_t)\,dt+\xi\sqrt{1+Y_t^2}\,dW^{(2)}_t,\\[0.2em]
+g(y)=\sigma_{\min}+\frac{\sigma_{\max}-\sigma_{\min}}{1+e^{-y}},\qquad d\langle W^{(1)},W^{(2)}\rangle_t=\rho\,dt,\qquad S_t=e^{X_t}.
+\end{gather*}
+\begin{proposition*}[non-commutativity]
+With $q(y)=\xi\sqrt{1+y^2}$, the diffusion columns $b_1,b_2$ of $(X,Y)$ for independent drivers $B^{(1)}=W^{(1)}$, $B^{(2)}$ satisfy
+\[
+L^2b_1-L^1b_2=\bigl(\sqrt{1-\rho^2}\,q(Y)\,g'(Y),\,0\bigr)^{\!\top}\neq0.
+\]
+\end{proposition*}
+Strong order one would in general need L\'evy areas (commutator $X$-component $0.0433$ at $Y=\theta$); we use
+log-Euler--Maruyama, for which $S_{n+1}=e^{X_{n+1}}>0$.
+\closing{Model: $\mu=0.05$, $\kappa=2$, $\theta=-0.2$, $\xi=0.6$, $\sigma_{\min}=0.10$, $\sigma_{\max}=0.50$.\\
+Initial values, horizon and correlation: $S_0=100$, $Y_0=0$, $T=1$, $\rho=-0.7$; payoff $(S_T-100)^+$.}
+\end{frame}
+
+% =========================================================== 5  oracles
+\begin{frame}{Two exact identities serve as oracles for the code}
+\bodytop\vspace{-0.6mm}
+\begin{proposition*}[GBM mean bias]
+For Euler--Maruyama and Milstein, $\E S_N=S_0(1+\mu h)^N$, hence
+\[
+\delta(h)=S_0\bigl[(1+\mu h)^{T/h}-e^{\mu T}\bigr]=-\tfrac12S_0e^{\mu T}\mu^2T\,h+O(h^2).
+\]
+\end{proposition*}
+\vspace{0.8em}% + below-display skip = the 1.4em gap before the remark
+\begin{proposition*}[log-EM preserves the mean]
+For the non-affine log-Euler--Maruyama scheme and every $h=T/N$, \ $\E S_N=S_0e^{\mu T}=\E S_T$.
+\end{proposition*}
+\vspace{1.4em}
+\noindent\lead{Remark.}\ The identity payoff therefore carries no discretisation bias in the non-affine model; its weak error
+must be measured with a nonlinear payoff, here the call $(S_T-100)^+$.
+\end{frame}
+
+\section{GBM}
+% =========================================================== 6  GBM strong
+\begin{frame}{On GBM the strong orders one half and one are reproduced}
+\note{Data: results/gbm\_strong.csv}
+\bodytop
+\figframe{gbm_strong.pdf}
+{Strong error against the exact coupled path, $M=2\times10^6$. Filled points ($N\ge64$) fitted; $95\%$ bars within
+markers; dashed: slopes $\tfrac12$ and~$1$.}
+{Fitted slopes, $\pm$ one jackknife SE:\par\vspace{0.4em}
+\slopetab{Euler--Maruyama & $0.4991\pm0.0004$\\ Milstein & $0.9979\pm0.0002$}\colgap
+Local orders rise monotonically to $\emLocalOrderFine$ and $\milLocalOrderFine$; at $h=1/512$ Milstein is about $60\times$
+more accurate.}
+\end{frame}
+
+% =========================================================== 7  GBM weak
+\begin{frame}{The weak bias of GBM is first order, as the analytic bias predicts}
+\note{Data: results/gbm\_weak.csv; moments and quantiles: results/gbm\_moments.csv, results/gbm\_distribution.csv}
+\bodytop
+\figframe{gbm_weak.pdf}
+{Top: absolute bias and analytic $|\delta(h)|$; bottom: signed bias with $95\%$ intervals. Filled points fitted;
+markers offset horizontally for visibility.}
+{Weak slopes:\par\vspace{0.4em}
+\slopetab{Euler--Maruyama & $1.0100\pm0.0440$\\ & {\color{muted}\footnotesize $N=2$--$64$}\\[0.15em]
+Milstein & $0.9981\pm0.0004$\\ & {\color{muted}\footnotesize $N=2$--$512$}}\colgap
+All $\analyticInCI$ signed intervals contain $\delta(h)$.\colgap
+At $N=256$, moments and all ten quantile intervals agree with the exact law within Monte Carlo error.}
+\end{frame}
+
+\section{Non-affine}
+% =========================================================== 8  non-affine strong
+\begin{frame}{Log-EM shows an empirical half order against two references}
+\note{Data: results/nonaffine\_strong.csv}
+\bodytop
+\figframe{nonaffine_strong.pdf}
+{Coupled discrepancy to Euler--Maruyama references, $M=5\times10^4$. All points fitted, offset
+horizontally; $95\%$ bars within markers; dashed: slope~$\tfrac12$.}
+{Slopes on $N=32$--$512$:\par\vspace{0.4em}
+\slopetab{ref.\ $4096$ & $0.5205\pm0.0019$\\ ref.\ $8192$ & $0.5090\pm0.0018$}\colgap
+The finer reference is closer to $\tfrac12$.\colgap
+The references differ by $\refGap\pm\refGapSE$ ($\refRatio\%$ of the value at $N=512$): these are discrepancies, not exact
+errors.}
+\end{frame}
+
+% =========================================================== 9  non-affine weak, main run
+\begin{frame}{With $5\times10^4$ paths the non-affine payoff bias is not resolved}
+\note{Data: results/nonaffine\_weak.csv}
+\bodytop
+\figframe{nonaffine_weak.pdf}
+{Paired call-payoff differences against both references; top: absolute, bottom: signed with $95\%$ intervals.
+All points open (none fitted), offset horizontally.}
+{All ten intervals contain zero (paired, $95\%$; SE about $0.003$ at $N=32$ and $0.0008$ at $N=512$).\colgap
+No weak slope is reported: no grid passes the resolution rule in this run.}
+\end{frame}
+
+% E2 slopes on p10 written to 4 dp as in report Table tab:slopes (macros give 3 dp), so p10 and p14 agree
+% =========================================================== 10  E2
+\begin{frame}{With $4\times10^5$ paths on coarse grids the payoff bias is resolved}
+\note{Data: results/extensions/ext\_nonaffine\_coarse.csv}
+\tabletop
+{\tabfont
+\begin{tabular*}{\textwidth}{@{}r@{\extracolsep{\fill}}lll@{}}
+\toprule
+$N$ & \stack{payoff difference,\\ ref.\ $512$} & \stack{payoff difference,\\ ref.\ $1024$} & \stack{mean difference,\\ ref.\ $1024$}\\
+\midrule
+2  & $0.0719\pm0.0046$ & $0.0724\pm0.0046$ & $\phantom{-}0.0024\pm0.0053$\\
+4  & $0.0402\pm0.0033$ & $0.0406\pm0.0033$ & $\phantom{-}0.0014\pm0.0038$\\
+8  & $0.0174\pm0.0023$ & $0.0178\pm0.0023$ & $-0.0009\pm0.0027$\\
+16 & $0.0090\pm0.0016$ & $0.0094\pm0.0016$ & $\phantom{-}0.0005\pm0.0019$\\
+32 & $0.0040\pm0.0011^{\circ}$ & $0.0045\pm0.0011$ & $\phantom{-}0.0007\pm0.0013$\\
+64 & $0.00196\pm0.00077^{\circ}$ & $0.00241\pm0.00079^{\circ}$ & $\phantom{-}0.00071\pm0.00092$\\
+\bottomrule
+\end{tabular*}\par}
+\blockgap
+The weak slopes are $1.0209\pm0.0685$ (ref.\ $512$, $N=2$--$16$) and $1.0127\pm0.0829$
+\mbox{(ref.\ $1024$, $N=2$--$32$)}. The mean difference is zero within error, as the identity requires.
+\closing{$M=4\times10^5$; $\pm$ one SE; ${}^\circ$ not resolved by the fit rule; grid set fixed after a first run with $N=1$.}
+\end{frame}
+
+\section{Checks}
+% =========================================================== 11  E1 / E1b
+\begin{frame}{The strong rates disappear when the coupling is removed}
+\note{Data: results/extensions/ext\_uncoupled\_strong.csv, results/extensions/ext\_misaligned.csv}
+\tabletop
+{\tabfont
+\begin{tabular*}{\textwidth}{@{}r@{\extracolsep{\fill}}rrrr@{}}
+\toprule
+ & \multicolumn{2}{c}{coupled} & \multicolumn{2}{c}{uncoupled}\\
+\cmidrule(r{1.4em}){2-3}\cmidrule(l{1.4em}){4-5}
+$N$ & Euler--Maruyama & Milstein & Euler--Maruyama & Milstein\\
+\midrule
+8   & $0.8179$  & $0.10665$   & $23.573$ & $23.544$\\
+32  & $0.41633$ & $0.027503$  & $23.606$ & $23.599$\\
+128 & $0.20912$ & $0.006937$  & $23.615$ & $23.613$\\
+512 & $0.10492$ & $0.0017351$ & $23.617$ & $23.616$\\
+\addlinespace[3pt]
+slope & $\eOneCoupledSlopeEM$ & $\eOneCoupledSlopeMil$ & $\eOneUncSlopeEM$ & $\eOneUncSlopeMil$\\
+\bottomrule
+\end{tabular*}\par}
+\blockgap
+Without coupling the error is the natural spread $\E|S_T-S_T'|\approx\eOneUncoupled$ (E1). Replacing the block sum by a
+strided sum leaves the GBM slopes unchanged ($\eOneBGbmEMOkSlope$, $\eOneBGbmMilOkSlope$) but lowers the non-affine slope
+from $\eOneBNonaffOkSlope$ to $\eOneBNonaffBadSlope$ (E1b).
+\closing{E1: GBM strong error, $M=2\times10^5$, independent seed stream. E1b: $M=10^4$.}
+\end{frame}
+
+% =========================================================== 12  cost
+\begin{frame}{Cost at a matched strong-error target of $0.11$}
+\note{Data: results/gbm\_strong.csv, results/extensions/ext\_wallclock.csv}
+\tabletop
+{\tabfont
+\begin{tabular*}{\textwidth}{@{}l@{\extracolsep{\fill}}rrrrr@{}}
+\toprule
+Method & $N$ & strong error & upper $95\%$ & work $MN$ & solver time\\
+\midrule
+Euler--Maruyama & $512$ & $0.10473$ & $0.10485$ & $1{,}024{,}000{,}000$ & $\wcEM$\,ms\\
+Milstein        & $8$   & $0.10658$ & $0.10672$ & $16{,}000{,}000$     & $\wcMil$\,ms\\
+\bottomrule
+\end{tabular*}\par}
+\blockgap
+Milstein reaches the target with $64\times$ fewer path updates and about $26\times$ less wall-clock time; the second ratio
+is smaller because one Milstein step costs $\wcStepRatioEight$ ($N=8$) to $\wcStepRatioFiveTwelve$ ($N=512$) times an
+Euler--Maruyama step.
+\closing{GBM, $M=2\times10^6$ for the errors. Time: solver loop only, $\wcPaths$ paths, median of $\wcRepeats$ repeats, one
+machine. The $158\times$ of our first version was a row-major storage artefact, now corrected.}
+\end{frame}
+
+\section{Close}
+% =========================================================== 13  limitations
+\begin{frame}{Limitations}
+\bodytop
+\begin{itemize}\setlength{\itemsep}{0.38em}
+\item The non-affine errors are discrepancies against Euler--Maruyama references, not exact~errors.
+\item The E2 weak slopes rest on coarse grids; the grid set was chosen after a first run.
+\item The call payoff is not smooth and $e^X$ is not globally Lipschitz, so the non-affine rates are~empirical.
+\item One parameter set; positivity was analysed only analytically; no Milstein scheme with L\'evy areas.
+\item Slope errors are conditional jackknife SEs; timings come from one machine.
+\end{itemize}
+\closing{{\color{hairline}\rule{\textwidth}{0.4pt}}\par\vspace{0.6mm}\notesizesmall
+AI use (report, Appendix A). Codex: numerical library and tests, review-driven revisions (resolved weak grids, jackknife SE);
+on 10 Oct.\ (GPT-6 Astra, Ultra) the weak-grid refactor, independently re-checked. ChatGPT (GPT-6, Pro: review; GPT-6.1 Sol: language
+polishing). Grok Bot: LaTeX typesetting, report restructuring and code packaging; drafted the supplementary code and two
+derivations.}
+\end{frame}
+
+% =========================================================== 14  summary
+\begin{frame}{Summary of the observed rates}
+\note{Data: report Table tab:slopes}
+\tabletop
+{\tabfont
+\begin{tabular*}{\textwidth}{@{}l@{\extracolsep{\fill}}lcll@{}}
+\toprule
+Study & Method & theory & slope $\pm$ SE & fitted $N$\\
+\midrule
+GBM strong & Euler--Maruyama & $1/2$ & $0.4991\pm0.0004$ & 64--512\\
+GBM strong & Milstein & $1$ & $0.9979\pm0.0002$ & 64--512\\
+GBM weak & Euler--Maruyama & $1$ & $1.0100\pm0.0440$ & 2--64\\
+GBM weak & Milstein & $1$ & $0.9981\pm0.0004$ & 2--512\\
+\addlinespace[2pt]
+Non-affine strong & ref.\ 4096 / 8192 & ($1/2$) & $0.5205\pm0.0019$ / $0.5090\pm0.0018$ & 32--512\\
+Non-affine weak, E2 & ref.\ 512 / 1024 & ($1$) & $1.0209\pm0.0685$ / $1.0127\pm0.0829$ & 2--16 / 2--32\\
+\bottomrule
+\end{tabular*}\par}
+\blockgap
+On GBM the theory is reproduced against the exact solution; for the non-affine model the rates are empirical and depend on
+numerical references. Next steps: a third reference, multilevel Monte Carlo, and Milstein with simulated L\'evy areas.
+\closing{Theory in parentheses is expected, not proved, for the price statistic.\hfill{\normalsize\itshape Thank you; questions are welcome.}}
+\end{frame}
+
+\end{document}
