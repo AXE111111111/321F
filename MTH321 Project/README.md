@@ -1,80 +1,134 @@
-# MTH321 Direction 4: Financial SDE numerical implementation
+# MTH321 Project 1 — Direction 4 (Financial SDE) — Team F code package
 
-This directory implements the numerical part of Direction 4. The supplied sources are three PDFs (`ODE_IVP_Project_Brief.pdf`, `problem_pack (5).pdf`, and `Direction_4_Coding_Implementation_Guide.pdf`) plus the theory chapter `mathematical_theory.tex`. This code adds no deterministic ODE experiments. The supplied sources are not generated outputs.
+This package contains the numerical code, unit tests, saved full-run results and figures behind the
+Team F report `TeamF_Report.pdf` (submitted separately). It implements exact/Euler–Maruyama/Milstein
+simulation of geometric Brownian motion (GBM) and Euler–Maruyama for the non-affine stochastic-volatility
+model of the Problem Pack (Direction 4, pp. 6–7). No deterministic ODE experiments are included: in
+Direction 4, strong/weak convergence with coupled paths, Monte Carlo uncertainty and nested-reference
+validation replace the deterministic stability/adaptivity tasks.
 
-## Environment and reproduction
+## Layout
 
-Use Python 3.10+ with NumPy, SciPy, and Matplotlib. From this directory:
-
-```powershell
-python code/run_all.py
-python -m unittest discover -s tests -v
-```
-
-On the course machine, `..\.venv\Scripts\python.exe` can replace `python`. A quick integration check is `python code/run_all.py --smoke --output-dir <temporary-directory>`; its small samples must not be reported as final results. `python code/run_all.py --plots-only` redraws the five PDF figures from existing CSV files without changing numerical data.
-
-## Report and presentation
-
-The English report is `report/MTH321_Direction4_Report.pdf`; its main source is `report/main.tex`, which includes the supplied `mathematical_theory.tex` unchanged. It contains background, models, mathematical methods, the Direction 4 replacement for deterministic stability/adaptivity, experiments, conclusions, an AI transparency log and five individual contribution forms. The presentation is `slides/MTH321_Direction4_Slides.pdf` with editable Beamer source `slides/main.tex`. `slides/speaker_notes.md` gives a ten-minute rehearsal plan and a three-minute Q&A preparation section.
-
-**Team completion still required:** identities, student IDs, actual contributions and signatures were not provided. The five ICS forms are unsigned, and the AI appendix explicitly identifies the manual checks and any additional tools the members must confirm. Fill `report/team_details.tex` and the contribution/AI appendix sources from the team's actual records before submitting. The course's separate report template and detailed ICS rubric were not supplied; use any mandatory declaration wording from those materials.
-
-Rebuild the documents after regenerating the numerical data (a LaTeX installation with Beamer is required):
-
-```powershell
-python report/build_evidence.py
-cd report
-pdflatex -interaction=nonstopmode -halt-on-error -jobname=MTH321_Direction4_Report main.tex
-pdflatex -interaction=nonstopmode -halt-on-error -jobname=MTH321_Direction4_Report main.tex
-cd ../slides
-pdflatex -interaction=nonstopmode -halt-on-error -jobname=MTH321_Direction4_Slides main.tex
-pdflatex -interaction=nonstopmode -halt-on-error -jobname=MTH321_Direction4_Slides main.tex
-```
-
-`report/build_evidence.py` reads the nine saved CSVs, derives the report's tables and numeric macros, and records source hashes in `report/data/provenance.json`. It does not simulate or edit numerical results. The matched-accuracy cost table counts path updates M*N from saved GBM rows, not wall-clock time. The report and slides use compiled LaTeX mathematics and the existing five figure PDFs.
-
-`FINAL_SELF_CHECK.md` records the third-round checks and remaining team-only information. Optional read-only document/evidence checks are available through `python report/check_delivery.py` (requires pypdf). After all team edits and document recompilation, `python report/build_submission.py` rebuilds the named submission ZIP from an explicit allowlist and verifies every entry against the current file before replacing the archive.
-
-The default full run overwrites only generated files under `results/` and `figures/`. The master seed is 32104. Separate `SeedSequence` children drive GBM and the non-affine model; solvers receive increments explicitly and never draw random numbers. CSV results under `results/` are byte-reproducible with the same software, path counts and batch sizes. Figure PDFs may differ in bytes because Matplotlib writes creation timestamps. Changing the batch size changes which random numbers are assigned to paths but not the sampling law.
-
-## Methods and interpretation
-
-- GBM uses $S_0=100,\ \mu=0.05,\ \sigma=0.2,\ T=1$ and 2,000,000 paths in batches of 10,000. Each batch has one 512-step Brownian master path per trajectory. Every grid $N\in\{2,4,8,16,32,64,128,256,512\}$ is a block-sum descendant. The exact terminal price, Euler--Maruyama (EM) and Milstein all use the same path. Strong errors are pathwise absolute differences; weak biases are **signed paired** differences. The numerical EM and Milstein terminal distributions at $N=256$ are compared with the exact lognormal law.
-- The non-affine model uses the parameters in the supplied problem, 50,000 paths in batches of 1,000, and two independent 8,192-step master streams. Independent streams are aggregated before correlation is imposed. All coarse grids and the 4,096/8,192-step numerical references are coupled descendants. EM advances $(X,Y)$ and reconstructs $S=e^X$. Any non-finite state or non-positive terminal price triggers an explicit error; paths are never clipped or dropped.
-- Cross-batch statistics use a stable count/mean/centred-second-moment combination. Sample standard deviations use one degree-of-freedom correction. Reported mean intervals are approximately $\widehat m\pm1.96\,\mathrm{SE}$. The GBM strong fit range is fixed in advance at $N\ge64$; weak points must first pass the signed confidence-interval and relative-half-width criteria. A slope is reported only when at least four individually resolved points are available. Non-affine slopes are **empirical refinement slopes**, not exact-error orders.
-
-Additional uncertainty columns make the supporting checks interpretable. The sample-variance standard error is a fourth-central-moment plug-in estimate; quantile standard errors use the asymptotic formula with the exact lognormal density at the exact quantile; histogram density errors use a fixed-bin binomial approximation. Increment-variance and correlation standard errors use normal/asymptotic formulas. These are approximations, not simultaneous confidence bands, and the histogram bin edges themselves are data-dependent.
-
-Fitted-slope uncertainty uses a delete-one-batch jackknife over the same paired batches at every grid (200 GBM batches, 50 non-affine batches). The fit-point mask is held fixed for each deletion. Thus `fitted_slope_se` captures Monte Carlo variation and cross-grid dependence conditional on the chosen mask; it does not quantify time-discretisation bias, reference error or uncertainty from selecting the fit range. The existing `fitted_slope_ci_lower` and `fitted_slope_ci_upper` columns give the normal approximation slope +/- 1.96 jackknife SE. Their companion `fitted_slope_interval_method` explicitly records that coverage has not been validated; these bounds are not calibrated confidence intervals for the true asymptotic order. `fitted_slope_residual_se` is an additional ordinary regression diagnostic that ignores cross-grid dependence; it is **not** guaranteed to be a lower bound.
-
-The optional GBM positivity experiment was **not** performed. The old unused `track_negative` hook was removed because it counted negative time steps rather than distinct paths. Under the benchmark parameters, the EM one-step negative-factor probability at the coarsest grid $h=1/2$ is approximately $2.12\times10^{-13}$, so even 2,000,000 two-step paths have fewer than $10^{-6}$ expected negative-factor events. Milstein's update factor is non-negative for every $h>0$ here because $\sigma^2-2\mu=-0.06<0$. Zero observed events would therefore not measure a useful rate. A separate high-volatility parameter set would be needed for a meaningful empirical positivity study.
-
-## Generated data and figures
-
-For a submission bundle, include the code, tests, generated results and figures, this README, and whichever supplied sources the course requires. Temporary PDF text extracts and working notes should be excluded; they have not been deleted from this working directory.
-
-| CSV under `results/` | Purpose |
+| Path | Contents |
 |---|---|
-| `gbm_strong.csv` | Exact-path strong errors, intervals and fitted points |
-| `gbm_weak.csv` | Signed paired mean biases, analytic biases, intervals and fitted points |
-| `gbm_distribution.csv` | Numerical quantiles and density-normalised histogram bins with uncertainty |
-| `gbm_moments.csv` | Numerical and exact mean/variance with numerical standard errors |
-| `nonaffine_strong.csv` | Coupled price differences against both numerical references |
-| `nonaffine_weak.csv` | Signed paired call-payoff differences against both references |
-| `nonaffine_increment_diagnostics.csv` | Increment means, variances, correlations, targets and uncertainty |
-| `nonaffine_path_validation.csv` | Finite-state and positive-price counts on every grid |
-| `nonaffine_reference_comparison.csv` | Direct comparison of the 4,096- and 8,192-step references |
+| `code/config.py` | All parameters, grids, path counts, batch sizes and the master seed (32104) |
+| `code/random_paths.py` | Brownian increments, block-sum aggregation (coupling), correlation transform |
+| `code/gbm.py` | Exact, EM and Milstein GBM terminal solvers; exact mean/variance; analytic EM mean bias |
+| `code/nonaffine.py` | Bounded logistic volatility `g(y)` and two-noise log-EM solver for `(X, Y)`, `S = exp(X)` |
+| `code/statistics.py` | Batch-safe running statistics, fit-eligibility rule, log–log fit, paired jackknife slope SE |
+| `code/experiments.py` | Coupled, batched GBM and non-affine experiments; writes the nine main CSVs |
+| `code/plotting.py` | Draws the five report figures from the saved CSVs only |
+| `code/run_all.py` | Main entry point: runs both experiments and regenerates all CSVs and all five figures |
+| `code/extensions.py`, `code/run_extensions.py` | Supplementary experiments E1, E1b, E2, E3 used in the report (Sections 4.6, 4.7, 4.9); AI-drafted, team review pending |
+| `code/report_tables.py` | Reads the CSVs and writes the LaTeX tables/macros used in the report (no simulation) |
+| `tests/` | 23 unit/integration tests (`unittest`) |
+| `results/*.csv` | Nine full-run CSVs (GBM M = 2,000,000; non-affine M = 50,000) |
+| `results/extensions/*.csv` | Four supplementary CSVs (E1, E1b, E2, E3) |
+| `figures/*.pdf` | The five report figures generated by `code/run_all.py` |
+| `mathematical_theory.tex` | Team theory chapter (source text; the report contains the final version) |
+| `docs/` | Team-supplied internal documents (authorship to be confirmed by the team; not course material): `Direction_4_Coding_Implementation_Guide.pdf`, `GBM_Part_I_Mathematical_Guide.pdf`, `NonAffine_EM_Derivation.pdf` |
 
-The five PDFs under `figures/` are `gbm_strong_convergence.pdf`, `gbm_weak_convergence.pdf`, `gbm_distribution.pdf`, `nonaffine_strong_convergence.pdf` and `nonaffine_weak_convergence.pdf`. Plots read the saved CSVs. Filled convergence markers enter a fit; open markers do not. Weak plots also show signed estimates with 95% intervals, so a visually declining absolute estimate cannot hide a confidence interval crossing zero.
+Course materials (brief, problem pack, role cards) are not redistributed here.
 
-## Verified full-run findings
+## Environment
 
-The figures and numbers in this section are regenerated from the full run, not the smoke test.
+Python 3.10+ (tested with Python 3.13.5). Install the pinned dependencies:
 
-With 2,000,000 GBM paths, the predeclared fine-grid strong fits give slopes 0.4991 $\pm$ 0.00036 (EM) and 0.9979 $\pm$ 0.00016 (Milstein). The signed weak-bias fits give 1.0100 $\pm$ 0.04405 for EM on six resolved grids ($N=2$ through $64$) and 0.9981 $\pm$ 0.00043 for Milstein on all nine grids. Every $\pm$ value in this paragraph is one paired-batch jackknife standard error, not a 95% interval. The finer EM points $N=128,256,512$ remain below the chosen Monte Carlo signal threshold and were not fitted. All 18 simulated signed-bias intervals contain the corresponding analytic bias. At $N=256$, both numerical means and variances, and all ten numerical quantiles, have approximate 95% intervals containing their exact GBM counterparts. These individual intervals are not a joint 95% guarantee.
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt    # numpy, scipy, matplotlib
+```
 
-The weak EM slope standard error is much larger than Milstein's because its finest fitted point, $N=64$, has an absolute estimated bias only about seven times its own standard error. On the log scale the derivative $1/|\hat\delta|$ amplifies noise at that small-bias point and propagates it into the slope. This explains the larger Monte Carlo uncertainty and does not change the 18/18 analytic-bias interval checks.
+Only NumPy, SciPy (`scipy.special.expit`, `scipy.stats`) and Matplotlib are used, plus the standard library.
+Note: the module `code/statistics.py` shadows the standard-library `statistics` module when `code/` is on
+the path; nothing in this package imports the standard-library version.
 
-The EM weak fit includes the coarse step $h=1/2$. Fitting the **analytic** bias on the same six grids gives slope 0.9956 (or 0.9982 using only $N=8,16,32,64$), reflecting the $O(h^2)$ curvature of a first-order bias. The simulated 1.0100 is not a rate better than the theory; its difference from the analytic fit must be read with the Monte Carlo slope uncertainty.
+## Reproduction (run from the package root, the directory containing this README)
 
-Against the 4,096- and 8,192-step non-affine references, the empirical strong refinement slopes are 0.5205 $\pm$ 0.00187 and 0.5090 $\pm$ 0.00184 (one paired-batch jackknife standard error each). All ten signed call-payoff difference intervals include zero, so no weak-payoff slope is claimed. All 50,000 terminal states are finite and positive at each of the seven simulated grids. The mean absolute difference between the two numerical references is 0.04022, while the $N=512$ discrepancy against the 8,192-step reference is 0.15495; their ratio is 25.96%. By the triangle inequality, 0.04022 bounds how much the **reported mean absolute discrepancy** can change when switching between these two references. The observed change at $N=512$ is only 0.00552, and the observed fitted-slope change is 0.01153. Neither number is a bound on error relative to an unknown exact solution or on the true convergence order.
+```bash
+python -m unittest discover -s tests -v                    # 23 tests, ~15 s
+python code/run_all.py --smoke --output-dir /tmp/smoke     # integration check, a few seconds (NOT reportable numbers)
+python code/run_all.py --plots-only                        # redraw the 5 figures from results/*.csv
+python code/run_all.py                                     # FULL run: overwrites results/*.csv and figures/*.pdf
+python code/run_extensions.py                              # supplementary E1, E1b, E2, E3 (~65 s): results/extensions/*.csv
+python code/report_tables.py --out <dir>                   # LaTeX tables/macros used by the report
+```
+
+Use `--output-dir <dir>` with `run_all.py` / `run_extensions.py` to write to `<dir>/results` and
+`<dir>/figures` instead of overwriting the shipped files. With the default (no `--output-dir`) the outputs go
+to `results/` and `figures/` of this package. On the machine used for the final check (x86_64, Python 3.13.5) the full
+`run_all.py` took about 2.2 minutes (GBM 76 s, non-affine 56 s) and `run_extensions.py` about 1 minute.
+
+### Which command reproduces which report item
+
+| Report item | File | Command |
+|---|---|---|
+| Fig. GBM strong convergence | `figures/gbm_strong_convergence.pdf` | `run_all.py` (or `--plots-only`) |
+| Fig. GBM weak convergence | `figures/gbm_weak_convergence.pdf` | `run_all.py` |
+| Fig. GBM terminal distribution | `figures/gbm_distribution.pdf` | `run_all.py` |
+| Fig. non-affine strong refinement | `figures/nonaffine_strong_convergence.pdf` | `run_all.py` |
+| Fig. non-affine payoff differences | `figures/nonaffine_weak_convergence.pdf` | `run_all.py` |
+| Tables of errors, orders, slopes, moments, quantiles, diagnostics | `results/*.csv` | `run_all.py`, then `report_tables.py` |
+| Tables E1 (uncoupled), E1b (misaligned aggregation), E2 (coarse non-affine), E3 (wall clock) | `results/extensions/*.csv` | `run_extensions.py` |
+
+## Reproducibility
+
+The master seed is 32104. `SeedSequence(32104).spawn(2)` children 0/1 drive GBM / non-affine in
+`experiments.py`; the supplementary experiments use children of `spawn(6)`: E1 = 2, E2 = 3, E3 = 4, E1b = 5 (independent streams).
+A child stream depends only on its index, so `spawn(6)[2]`/`[3]` equal the `spawn(4)[2]`/`[3]` streams of v1 and the
+E1/E2 CSVs are unchanged (E2 only gained the `reference_payoff_gap` row).
+Solvers receive increments explicitly and never draw random numbers. With the same software versions, path
+counts and batch sizes, the CSVs are reproducible to a relative difference ≤ 1e-9; byte identity is not
+guaranteed. A complete independent re-run of `run_all.py` on a machine other
+than the one that produced the shipped CSVs (10 Oct 2026, NumPy 2.5.3) reproduced all nine CSVs: three byte-identical, the others with maximum relative
+differences ≤ 4e-10 (floating-point summation order only). Figure PDFs can differ in bytes only through
+Matplotlib timestamps. `results/extensions/ext_wallclock.csv` (E3) contains machine-dependent timings and is
+**not** reproducible exactly by construction. Since v2, E3 converts the increment arrays to column-contiguous
+(Fortran) order before timing, because the solvers read one column per step; in v1 the row-major layout made the
+N = 512 EM timing artificially slow.
+
+## Methods (summary)
+
+- GBM: S0 = 100, μ = 0.05, σ = 0.2, T = 1; 2,000,000 paths in batches of 10,000; one 512-step master Brownian path
+  per trajectory; every grid N ∈ {2,…,512} is a block-sum descendant. Exact, EM and Milstein share the path.
+  Strong errors are pathwise absolute differences; weak biases are signed paired differences.
+- Non-affine model: Problem Pack parameters; 50,000 paths in batches of 1,000; two independent 8,192-step master
+  streams aggregated before correlation is imposed; coarse grids 32–512 and EM references 4,096 and 8,192.
+  Non-finite states or non-positive prices raise an explicit error; paths are never clipped or dropped.
+- Fit rules (fixed in code and applied unchanged; the single-commit git history cannot show when they were fixed): GBM strong fit uses N ≥ 64; a weak point is fitted only if its signed 95% CI excludes
+  zero and its half-width is below half the absolute estimate; a slope needs ≥ 4 such points. Slope SE =
+  paired delete-one-batch jackknife (200 GBM batches, 50 non-affine batches); it does not include
+  discretisation curvature, reference error or fit-range selection.
+- Supplementary (`extensions.py`): E1 strong error with uncoupled paths (shows coupling is needed);
+  E1b deliberately strided ("misaligned") aggregation: GBM slopes unchanged, non-affine slope collapses to ≈ 0.03,
+  so the aggregation index is checked by `test_random_paths.py` and the non-affine slope, not by GBM;
+  E2 non-affine coarse grids N = 2–64 with 400,000 paths: log-EM mean oracle and paired call-payoff
+  differences against EM references 512/1024, plus the reference check φ(S_512) − φ(S_1024) = 0.00044 ± 0.00020;
+  E3 indicative solver wall-clock of EM and Milstein at N = 8 and N = 512.
+- `extensions.py` imports the team's private helper `experiments._fit_rows` so that E2 uses exactly the same fit
+  rule and jackknife; a change to that helper changes E2.
+
+## Verified full-run findings (from the shipped CSVs)
+
+GBM strong slopes 0.4991 ± 0.00036 (EM) and 0.9979 ± 0.00016 (Milstein); GBM weak slopes 1.0100 ± 0.04405 (EM,
+N = 2–64) and 0.9981 ± 0.00043 (Milstein, all nine grids); 18/18 signed-bias intervals contain the analytic bias.
+Non-affine empirical strong slopes 0.5205 ± 0.00187 / 0.5090 ± 0.00184 (references 4,096 / 8,192); in the main
+run all ten payoff-difference intervals contain zero (no weak slope claimed). In E2 the coarse-grid payoff
+differences are resolved and give empirical weak slopes 1.021 ± 0.069 (ref. 512, N = 2–16) and
+1.013 ± 0.083 (ref. 1,024, N = 2–32). All ± values are one jackknife SE.
+E3 (machine dependent; our rerun, Python 3.13.5, NumPy 2.5.3, x86_64): EM at N = 512 5.71 ms vs Milstein at N = 8
+0.177 ms (≈ 32×) for 10,000 paths; at equal N one Milstein step costs ≈ 2.15× an EM step. Work ratio C = MN: 64×.
+
+The optional GBM positivity experiment was not performed (benchmark EM negative-factor probability at h = 1/2
+is about 2.12e-13; Milstein's factor is never negative because σ² − 2μ < 0); see the report.
+
+## Provenance
+
+Team repository: https://github.com/AXE111111111/321F (directory `MTH321 Project/`, flat layout). Its history is a
+single upload commit (`0f31750`, "Add files via upload", 2026-10-01); individual contributions are therefore traced
+by file and function, not by commit. This package
+re-arranges those files into the layout above without changing the numerical code; the additions are
+`code/extensions.py`, `code/run_extensions.py`, `code/report_tables.py`, `tests/test_extensions.py`,
+`results/extensions/`, `requirements.txt`, `.gitignore` and this README (prepared with AI assistance; see the
+AI Transparency Log in the report).

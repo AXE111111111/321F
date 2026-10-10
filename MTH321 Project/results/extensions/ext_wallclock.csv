@@ -1,0 +1,9 @@
+experiment,method,N,matched_accuracy_grid,array_layout,paths,repeats,median_seconds,min_seconds,max_seconds,seconds_per_path_step,python,numpy,machine,note
+E3_wallclock,EM,8,0,column-contiguous (Fortran order),10000,7,6.576298619620502e-05,6.531100370921195e-05,7.222301792353392e-05,8.220373274525628e-10,3.13.5,2.5.3,x86_64,machine dependent; not byte-reproducible
+E3_wallclock,Milstein,8,1,column-contiguous (Fortran order),10000,7,0.0001989029988180846,0.00019182098913006485,0.00023198898998089135,2.4862874852260577e-09,3.13.5,2.5.3,x86_64,machine dependent; not byte-reproducible
+E3_wallclock,EM,512,1,column-contiguous (Fortran order),10000,7,0.005179090017918497,0.004448911000508815,0.006444533995818347,1.0115410191247064e-09,3.13.5,2.5.3,x86_64,machine dependent; not byte-reproducible
+E3_wallclock,Milstein,512,0,column-contiguous (Fortran order),10000,7,0.013231657998403534,0.012512306973803788,0.013473680010065436,2.5843082028131904e-09,3.13.5,2.5.3,x86_64,machine dependent; not byte-reproducible
+E3_wallclock,EM,8,0,"row-major (C order), v1 setting",10000,7,0.00010212900815531611,0.00010165802086703479,0.00010592900798656046,1.2766126019414514e-09,3.13.5,2.5.3,x86_64,machine dependent; not byte-reproducible
+E3_wallclock,Milstein,8,1,"row-major (C order), v1 setting",10000,7,0.0003355930093675852,0.00024389699683524668,0.00039458900573663414,4.194912617094815e-09,3.13.5,2.5.3,x86_64,machine dependent; not byte-reproducible
+E3_wallclock,EM,512,1,"row-major (C order), v1 setting",10000,7,0.034349413006566465,0.03252642901497893,0.03619051701389253,6.7088697278450126e-09,3.13.5,2.5.3,x86_64,machine dependent; not byte-reproducible
+E3_wallclock,Milstein,512,0,"row-major (C order), v1 setting",10000,7,0.07399862998863682,0.06736684899078682,0.074905494984705,1.4452857419655629e-08,3.13.5,2.5.3,x86_64,machine dependent; not byte-reproducible

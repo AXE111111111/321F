@@ -30,7 +30,10 @@ class RandomPathTests(unittest.TestCase):
         self.assertLess(abs(float(np.mean(w2))), 5 * np.sqrt(0.005 / w2.size))
         self.assertLess(abs(float(np.var(w1, ddof=1)) - 0.005), 5 * 0.005 * np.sqrt(2 / w1.size))
         self.assertLess(abs(float(np.var(w2, ddof=1)) - 0.005), 5 * 0.005 * np.sqrt(2 / w2.size))
-        self.assertLess(abs(float(np.corrcoef(w1.ravel(), w2.ravel())[0, 1])) - 0.7, 0.015)
+        # v3 fix (submission package): the original assertion abs(corr) - 0.7 < 0.015 also passed for
+        # corr = 0 or +0.7. The sample correlation must be close to the signed target -0.7.
+        corr = float(np.corrcoef(w1.ravel(), w2.ravel())[0, 1])
+        self.assertLess(abs(corr - (-0.7)), 0.015)
 
 
 if __name__ == "__main__":
