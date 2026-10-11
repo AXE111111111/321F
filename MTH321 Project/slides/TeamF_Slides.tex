@@ -82,9 +82,7 @@ Ruitong Huang & 2360294 & Visualization \& Report\\
 \item For a non-affine stochastic-volatility model without an exact transition law, does Euler--Maruyama refine at half order
   against nested numerical references, and can its weak payoff bias be resolved statistically?
 \end{enumerate}
-\vspace{0.95em}
-{\leftskip=\leftmargini\lead{Why both.}\ Strong error is pathwise, weak error concerns expectations; their rates differ.\par}% content: report Sec. 1.1
-\vspace{0.6em}
+\vspace{2.2em}
 \hspace*{\leftmargini}\lead{Goal.}\ A trend counts only where it exceeds the Monte Carlo uncertainty.
 \closing{In Direction 4, stability regions and adaptive steps are replaced by the exact--EM--Milstein comparison, coupled strong and
 weak convergence, Monte Carlo confidence intervals and nested-grid validation; we add an analytic positivity analysis.}
@@ -103,9 +101,6 @@ Errors are measured on the same Brownian path,
 e_s(h)=\E\bigl|S^{(h)}_N-S_T\bigr|,\qquad e_w(h)=\bigl|\E S^{(h)}_N-\E S_T\bigr|,
 \]
 and theory predicts strong order $\tfrac12$ for Euler--Maruyama, $1$ for Milstein, and weak order $1$ for both.
-\par\vspace{0.75em}% content: report Sec. 2.7 (positivity replaces stability)
-\lead{Positivity.}\ The Euler--Maruyama factor $1+\mu h+\sigma\sqrt h\,Z$ can be negative for every $h$, the Milstein
-factor only if $(\sigma^2-2\mu)h>1$; here $\sigma^2-2\mu=-0.06$ and $p_{\mathrm{EM}}(1/2)\approx2.12\times10^{-13}$.
 \closing{$S_0=100$, $\mu=0.05$, $\sigma=0.20$, $T=1$; $M=2\times10^6$ paths, seed $32104$; $N=2,4,\dots,512$; coarse
 increments are block sums of one $512$-step master path.}
 \end{frame}
@@ -139,16 +134,13 @@ For Euler--Maruyama and Milstein, $\E S_N=S_0(1+\mu h)^N$, hence
 \delta(h)=S_0\bigl[(1+\mu h)^{T/h}-e^{\mu T}\bigr]=-\tfrac12S_0e^{\mu T}\mu^2T\,h+O(h^2).
 \]
 \end{proposition*}
-For our parameters $\delta(1/2)=\analyticBiasHalf$; with $\mu=0$ the bias would vanish and $\varphi(s)=s$ could not reveal a
-weak rate.% content: report Sec. 2.5
-\par\vspace{0.85em}
+\vspace{0.8em}% + below-display skip = the 1.4em gap before the remark
 \begin{proposition*}[log-EM preserves the mean]
 For the non-affine log-Euler--Maruyama scheme and every $h=T/N$, \ $\E S_N=S_0e^{\mu T}=\E S_T$.
 \end{proposition*}
 \vspace{1.4em}
 \noindent\lead{Remark.}\ The identity payoff therefore carries no discretisation bias in the non-affine model; its weak error
 must be measured with a nonlinear payoff, here the call $(S_T-100)^+$.
-\closing{Second identity as a code oracle: the paired difference $S^{(h)}_N-S^{(h_{\mathrm{ref}})}_N$ must be zero within error.}% content: report Remark 2.5, Sec. 4.6 (oracle passed)
 \end{frame}
 
 \section{GBM}
@@ -162,9 +154,7 @@ markers; dashed: slopes $\tfrac12$ and~$1$.}
 {Fitted slopes, $\pm$ one jackknife SE:\par\vspace{0.4em}
 \slopetab{Euler--Maruyama & $0.4991\pm0.0004$\\ Milstein & $0.9979\pm0.0002$}\colgap
 Local orders rise monotonically to $\emLocalOrderFine$ and $\milLocalOrderFine$; at $h=1/512$ Milstein is about $60\times$
-more accurate.\colgap
-The coarse-grid deficit is pre-asymptotic curvature, so only $N\ge64$ is fitted; the small gap to $\tfrac12$ and $1$ is
-finite-grid curvature, which the SE does not measure.}% content: report Sec. 4.1
+more accurate.}
 \end{frame}
 
 % =========================================================== 7  GBM weak
@@ -191,8 +181,7 @@ At $N=256$, moments and all ten quantile intervals agree with the exact law with
 horizontally; $95\%$ bars within markers; dashed: slope~$\tfrac12$.}
 {Slopes on $N=32$--$512$:\par\vspace{0.4em}
 \slopetab{ref.\ $4096$ & $0.5205\pm0.0019$\\ ref.\ $8192$ & $0.5090\pm0.0018$}\colgap
-Local orders rise at the finest grids (to $0.558$ against $4096$, $0.530$ against $8192$): a reference only $8\times$
-finer shares part of the coarse error, so the finer reference is closer to~$\tfrac12$.\colgap% content: report Sec. 4.4, Table 6
+The finer reference is closer to $\tfrac12$.\colgap
 The references differ by $\refGap\pm\refGapSE$ ($\refRatio\%$ of the value at $N=512$): these are discrepancies, not exact
 errors.}
 \end{frame}
@@ -205,9 +194,7 @@ errors.}
 {Paired call-payoff differences against both references; top: absolute, bottom: signed with $95\%$ intervals.
 All points open (none fitted), offset horizontally.}
 {All ten intervals contain zero (paired, $95\%$; SE about $0.003$ at $N=32$ and $0.0008$ at $N=512$).\colgap
-No weak slope is reported: no grid passes the resolution rule in this run.\colgap
-Common random numbers make the paired SE small, but for $N\ge32$ the bias is smaller still; a slope fitted here would
-measure sampling error, not the scheme. E2 resolves the bias on coarser grids.}% content: report Sec. 4.5, Fig. 5
+No weak slope is reported: no grid passes the resolution rule in this run.}
 \end{frame}
 
 % E2 slopes on p10 written to 4 dp as in report Table tab:slopes (macros give 3 dp), so p10 and p14 agree
@@ -255,8 +242,7 @@ slope & $\eOneCoupledSlopeEM$ & $\eOneCoupledSlopeMil$ & $\eOneUncSlopeEM$ & $\e
 \bottomrule
 \end{tabular*}\par}
 \blockgap
-Without coupling the error is the natural spread $\E|S_T-S_T'|\approx\eOneUncoupled$ (E1), $29\times$ to $225\times$ the
-coupled Euler--Maruyama error. Replacing the block sum by a
+Without coupling the error is the natural spread $\E|S_T-S_T'|\approx\eOneUncoupled$ (E1). Replacing the block sum by a
 strided sum leaves the GBM slopes unchanged ($\eOneBGbmEMOkSlope$, $\eOneBGbmMilOkSlope$) but lowers the non-affine slope
 from $\eOneBNonaffOkSlope$ to $\eOneBNonaffBadSlope$ (E1b).
 \closing{E1: GBM strong error, $M=2\times10^5$, independent seed stream. E1b: $M=10^4$.}
@@ -278,9 +264,7 @@ Milstein        & $8$   & $0.10658$ & $0.10672$ & $16{,}000{,}000$     & $\wcMil
 \blockgap
 Milstein reaches the target with $64\times$ fewer path updates and about $26\times$ less wall-clock time; the second ratio
 is smaller because one Milstein step costs $\wcStepRatioEight$ ($N=8$) to $\wcStepRatioFiveTwelve$ ($N=512$) times an
-Euler--Maruyama step.\blockgap
-The target $0.11$ is about the smallest error Euler--Maruyama attains on the tested grids ($N\le512$). Random-number
-generation, not counted, would also favour Milstein.% content: report Sec. 4.9
+Euler--Maruyama step.
 \closing{GBM, $M=2\times10^6$ for the errors. Time: solver loop only, $\wcPaths$ paths, median of $\wcRepeats$ repeats, one
 machine. The $158\times$ of our first version was a row-major storage artefact, now corrected.}
 \end{frame}
@@ -290,8 +274,7 @@ machine. The $158\times$ of our first version was a row-major storage artefact, 
 \begin{frame}{Limitations}
 \bodytop
 \begin{itemize}\setlength{\itemsep}{0.38em}
-\item The non-affine errors are discrepancies against Euler--Maruyama references, not exact~errors; the reference gap
-  is $\refRatio\%$ of the finest discrepancy.
+\item The non-affine errors are discrepancies against Euler--Maruyama references, not exact~errors.
 \item The E2 weak slopes rest on coarse grids; the grid set was chosen after a first run.
 \item The call payoff is not smooth and $e^X$ is not globally Lipschitz, so the non-affine rates are~empirical.
 \item One parameter set; positivity was analysed only analytically; no Milstein scheme with L\'evy areas.
@@ -324,8 +307,7 @@ Non-affine weak, E2 & ref.\ 512 / 1024 & ($1$) & $1.0209\pm0.0685$ / $1.0127\pm0
 \end{tabular*}\par}
 \blockgap
 On GBM the theory is reproduced against the exact solution; for the non-affine model the rates are empirical and depend on
-numerical references. Coupling is essential.% content: report Sec. 5 (Conclusions)
-\ Next steps: a third reference, multilevel Monte Carlo, and Milstein with simulated L\'evy areas.
+numerical references. Next steps: a third reference, multilevel Monte Carlo, and Milstein with simulated L\'evy areas.
 \closing{Theory in parentheses is expected, not proved, for the price statistic.\hfill{\normalsize\itshape Thank you; questions are welcome.}}
 \end{frame}
 
