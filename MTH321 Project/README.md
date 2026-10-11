@@ -44,6 +44,11 @@ pip install -r requirements.txt    # numpy, scipy, matplotlib
 ```
 
 Only NumPy, SciPy (`scipy.special.expit`, `scipy.stats`) and Matplotlib are used, plus the standard library.
+Optional for the figures: a LaTeX installation (`latex` on the PATH with the psnfss `mathpazo` Palatino fonts and
+`amsmath`/`amssymb`, e.g. TeX Live). `code/plotting.py` then sets Matplotlib's `text.usetex` so that all figure text is
+typeset in Palatino like the report; this LaTeX rendering is the default and is what the report figures are. If LaTeX is
+not available (or `TEAMF_PLOTS_NO_TEX=1` is set), `plotting.py` prints a notice and draws the same data with
+Matplotlib's mathtext and a Palatino-like serif font instead (glyphs differ slightly from the report figures).
 Note: the module `code/statistics.py` shadows the standard-library `statistics` module when `code/` is on
 the path; nothing in this package imports the standard-library version.
 
@@ -102,8 +107,8 @@ Solvers receive increments explicitly and never draw random numbers. With the sa
 counts and batch sizes, the CSVs are reproducible to a relative difference ≤ 1e-9; byte identity is not
 guaranteed. A complete independent re-run of `run_all.py` on a machine other
 than the one that produced the shipped CSVs (10 Oct 2026, NumPy 2.5.3) reproduced all nine CSVs: three byte-identical, the others with maximum relative
-differences ≤ 4e-10 (floating-point summation order only). Figure PDFs can differ in bytes only through
-Matplotlib timestamps. `results/extensions/ext_wallclock.csv` (E3) contains machine-dependent timings and is
+differences ≤ 4e-10 (floating-point summation order only). Figure PDFs from `plotting.py` (LaTeX rendering) differ
+in bytes between runs (embedded font-subset names) but render pixel-identically (checked at 200 dpi). `results/extensions/ext_wallclock.csv` (E3) contains machine-dependent timings and is
 **not** reproducible exactly by construction. Since v2, E3 converts the increment arrays to column-contiguous
 (Fortran) order before timing, because the solvers read one column per step; in v1 the row-major layout made the
 N = 512 EM timing artificially slow.
@@ -161,7 +166,14 @@ Relative to the repository upload `0f31750`:
   counts, grid order and summation order are unchanged. Independently verified: a full `run_all.py` with and without the
   refactor gives byte-identical CSVs (9/9), and the regenerated report tables are byte-identical.
 
-No solver code (`gbm.py`, `nonaffine.py`, `statistics.py`) or plotting code was changed.
+- Figure styling (v8): `code/plotting.py` draws the five figures in the report's typography (Palatino via LaTeX at
+  printed size; navy `#23426B` = EM / reference N=4096, brick `#B03A2E` = Milstein / reference N=8192; filled markers =
+  fitted points, open = excluded; 95% error bars; dashed fitted-slope guides; direct labels instead of a legend box; no
+  grid; run notes below the axes; no plot titles). It reads the same CSV columns and plots the same points, error bars,
+  fit guides and analytic-bias curves as before; file names and the `make_all_figures(results, figures)` interface are
+  unchanged. `python code/run_all.py --plots-only` regenerates exactly the figures used in the report.
+
+No solver code (`gbm.py`, `nonaffine.py`, `statistics.py`) was changed; the plotting code changed only as described above.
 
 ## Provenance
 
