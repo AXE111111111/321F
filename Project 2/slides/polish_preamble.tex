@@ -1,0 +1,117 @@
+% =====================================================================
+% polish_preamble.tex -- Team F talk preamble: palette, hairlines, theorem style, sizes
+% (body 10pt, frame titles 12pt, tables 9pt, captions 8pt), old-style figures in text,
+% lining figures in math, quiet section navigation in the footer.
+% =====================================================================
+\usefonttheme{serif}
+\usefonttheme{professionalfonts}
+\usepackage{amsmath}
+\usepackage{fontspec}
+\usepackage[math-style=TeX,bold-style=TeX]{unicode-math}
+\setmainfont{TeX Gyre Pagella}[Numbers={Lining,Proportional}]   % Palatino text, lining figures
+\setsansfont{TeX Gyre Pagella}[Numbers={Lining,Proportional}]   % no stray sans anywhere
+\setmonofont{TeX Gyre Pagella}[Numbers=Lining]
+\setmathfont{texgyrepagella-math.otf}                              % matching Palatino math
+\usepackage{array}
+\linespread{1.18}
+
+% ---------- palette --------------------------------------------------------
+\definecolor{ink}{HTML}{1F2933}
+\definecolor{accent}{HTML}{23426B}
+\definecolor{muted}{HTML}{4B5563}   % secondary text, lighter than ink
+\definecolor{hairline}{HTML}{C9CDD2}
+\definecolor{note}{HTML}{374151}     % page-bottom notes and captions (darker than muted)
+\definecolor{navcur}{HTML}{C2642B}   % current section in the footer nav (muted burnt orange)
+\definecolor{hlY}{HTML}{FFEB99}
+\definecolor{hlG}{HTML}{CDEBC5}
+\definecolor{hlR}{HTML}{F9D3C4}
+\definecolor{boxred}{HTML}{B03A2E}
+\definecolor{lineblue}{HTML}{2F5D8C}
+\setbeamercolor{normal text}{fg=ink,bg=white}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{structure}{fg=accent}
+\setbeamercolor{alerted text}{fg=boxred}
+\setbeamercolor{frametitle}{fg=accent,bg=}
+\setbeamercolor{footline}{fg=accent}   % footer in the structure navy
+\setbeamercolor{itemize item}{fg=muted}
+\setbeamercolor{enumerate item}{fg=muted}
+
+% ---------- sizes -------------------------------------------------------------
+\setbeamerfont{frametitle}{size=\fontsize{12}{14.5}\selectfont}
+\setbeamerfont{footline}{size=\fontsize{7.5}{9}\selectfont}
+
+% ---------- layout --------------------------------------------------------------
+\setbeamersize{text margin left=8mm,text margin right=8mm}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{frametitle}{%
+  \vskip 1.6mm% fixed-height title box: rule at the same y on every page
+  \hbox to\textwidth{\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\rule{0pt}{4.2mm}\smash{\insertframetitle}\hfil}%
+  \nointerlineskip\vskip 3.45mm\hbox{\color{hairline}\rule{\textwidth}{0.4pt}}\vskip -2.6mm}
+% quiet agenda in the footer: the current part in accent, the others in muted small caps
+\newcommand{\navitem}[2]{\ifnum\value{section}=#1{\color{navcur}\textsc{#2}}\else\textsc{#2}\fi}   % current part in burnt orange
+\newcommand{\navsep}{\hspace{0.9em}}
+\setbeamertemplate{footline}{%
+  \usebeamerfont{footline}\usebeamercolor[fg]{footline}%
+  \hbox to \paperwidth{\hskip 8mm\rlap{\textsc{Mixed boundary data}\ \textperiodcentered\ \textsc{Team F}}\hfill
+    \navitem{1}{model}\navsep\navitem{2}{analysis}\navsep\navitem{3}{experiments}\navsep
+    \navitem{4}{close}\hfill
+    \llap{\insertframenumber\,/\,\inserttotalframenumber}\hskip 8mm}\vskip 3.6mm}
+\addtobeamertemplate{frame begin}{}{\raggedright\hyphenpenalty=10000\exhyphenpenalty=10000}
+\hyphenpenalty=10000 \exhyphenpenalty=10000
+\setbeamertemplate{itemize item}{\raisebox{0.12ex}{\textendash}}
+\setbeamertemplate{enumerate item}{\insertenumlabel.}
+\setlength{\leftmargini}{1.4em}
+
+% ---------- theorem-like: small-caps label, no coloured blocks ------------------
+\setbeamertemplate{theorems}[normal font]
+\setbeamertemplate{theorem begin}{\par\addvspace{\blockskip}\noindent
+  {\upshape\scshape\color{accent}\inserttheoremname}%
+  \ifx\inserttheoremaddition\empty\else\ {\color{muted}(\inserttheoremaddition)}\fi.\ \itshape}
+\setbeamertemplate{theorem end}{\par\addvspace{\blockskip}}
+\newtheorem*{proposition*}{Proposition}
+\newtheorem*{remark*}{Remark}
+
+% ---------- no emphasis marks: no boxes, underlines or highlights -------------------
+\newcommand{\dfn}[1]{{\color{accent}#1}}
+\newcommand{\notesize}{\fontsize{8.5}{10.6}\selectfont}         % notes/captions 8.5pt
+\newcommand{\notesizesmall}{\fontsize{7.5}{9.4}\selectfont}    % AI-use block 7.5pt
+\newcommand{\aside}[1]{{\color{note}\notesize\upshape #1}}
+\newcommand{\figcap}[1]{{\color{note}\notesize\upshape #1\par}}   % \par inside: footnotesize leading
+
+% ---------- tables and display spacing ---------------------------------------------
+\usepackage{booktabs}
+\setlength{\aboverulesep}{0.3ex}\setlength{\belowrulesep}{0.45ex}
+\setlength{\heavyrulewidth}{0.6pt}\setlength{\lightrulewidth}{0.35pt}\setlength{\cmidrulewidth}{0.35pt}
+\renewcommand{\arraystretch}{1.1}
+\newcommand{\tabfont}{\small\addfontfeatures{Numbers={Lining,Monospaced}}}   % 9pt, lining figures so table columns align
+\newcommand{\stack}[1]{\begin{tabular}[t]{@{}l@{}}#1\end{tabular}}   % manual line break inside a cell
+\makeatletter
+\g@addto@macro\normalsize{\setlength\abovedisplayskip{5pt}\setlength\belowdisplayskip{5pt}%
+  \setlength\abovedisplayshortskip{4pt}\setlength\belowdisplayshortskip{4pt}}
+\makeatother
+
+% ---------- layout rhythm ---------------------------------------------------
+% every frame body starts \bodytop below the title rule; footnote-style asides sit \asidegap above the footer
+\newlength{\bodyskip}\setlength{\bodyskip}{0.6mm}
+\newlength{\blockskip}\setlength{\blockskip}{3.0mm}% the one fixed gap between body blocks
+\newcommand{\bodytop}{\vspace*{\bodyskip}\vspace*{1.6mm}\vspace{0pt plus 0.3fill}}
+\newcommand{\tabletop}{\vspace*{\bodyskip}\vspace*{2.5mm}}   % table top rule level with the cap height of text pages
+\newcommand{\closing}[1]{\par\addvspace{\blockskip}{\color{note}\notesize\upshape #1\par}\vspace{0pt plus 1fill}}
+\newcommand{\figend}[1]{\par\vspace{\blockskip}{\color{note}\notesize\upshape #1\par}\vspace{0pt plus 1fill}}   % figure frames: tighter bottom gap
+\newcommand{\blockgap}{\par\addvspace{\blockskip}}     % between body blocks (table -> text, list -> text)
+\newcommand{\colgap}{\par\vspace{\blockskip}}       % between paragraphs inside the text column of figure frames
+\newcommand{\lead}[1]{{\upshape\scshape\color{accent}#1}}   % small-caps run-in label (Goal, Remark)
+
+% ---------- stroke weight: text drawn fill+stroke with a hairline stroke in the text colour ----
+% Palatino stays Palatino; glyphs gain ~0.1pt per side, so the deck reads better when projected.
+% Text remains real text (selectable, searchable); colours unchanged (xcolor sets fill and stroke).
+\usepackage{pdfrender}
+\newcommand{\strokeweight}{0.15pt}
+\AtBeginDocument{\pdfrender{TextRenderingMode=FillStroke,LineWidth=\strokeweight,LineJoinStyle=1}}
+% ---------- Project 2 additions ----------
+\definecolor{todo}{HTML}{B03A2E}
+\newcommand{\TODO}[1]{{\color{todo}[TODO: #1]}}
+
+\setlength{\parskip}{0pt}
+\AtBeginDocument{\renewcommand{\setminus}{\mathbin{\backslash}}}
