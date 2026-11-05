@@ -1,0 +1,11 @@
+# Re-run 2026-11-03 (Asia/Shanghai) via python3 bank_vs_solver.py; numbers unchanged from 2026-10-29 log.
+P1 trigonometric mode (Dirichlet)                       first errs=3.54e-03 8.41e-04 2.05e-04 5.06e-05  order=2.04
+P1 trigonometric mode (Dirichlet)                       ghost errs=3.19e-03 8.00e-04 2.00e-04 5.00e-05  order=2.00
+P2 harmonic polynomial (Dirichlet)                      first errs=2.51e-02 1.20e-02 5.90e-03 2.92e-03  order=1.03
+P2 harmonic polynomial (Dirichlet)                      ghost errs=7.36e-13 7.37e-13 7.29e-13 7.26e-13  order=0.01
+P5 exponential-trig mode (non-zero Dirichlet)           first errs=3.53e-02 1.56e-02 7.26e-03 3.50e-03  order=1.11
+P5 exponential-trig mode (non-zero Dirichlet)           ghost errs=5.91e-03 1.47e-03 3.68e-04 9.20e-05  order=2.00
+P3 exponential-trig mode (mixed Dirichlet/Neumann) [rotated x<->y] first errs=3.53e-02 1.56e-02 7.26e-03 3.50e-03  order=1.11
+P3 exponential-trig mode (mixed Dirichlet/Neumann) [rotated x<->y] ghost errs=5.91e-03 1.47e-03 3.68e-04 9.20e-05  order=2.00
+P4 variable diffusion (Dirichlet)                       first errs=3.55e-03 8.40e-04 2.04e-04 5.04e-05  order=2.05
+P4 variable diffusion (Dirichlet)                       ghost errs=3.17e-03 7.95e-04 1.99e-04 4.97e-05  order=2.00
