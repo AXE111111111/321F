@@ -1,0 +1,9 @@
+bc,closure,norm,expected,fitted_order,max_log_dev,window
+Neumann,first,L2,1,1.0301,0.0158,all levels
+Neumann,first,Linf,1,1.0230,0.0114,all levels
+Neumann,ghost,L2,2,2.0012,0.0010,all levels
+Neumann,ghost,Linf,2,1.9980,0.0017,all levels
+Robin,first,L2,1,1.0184,0.0097,all levels
+Robin,first,Linf,1,1.0114,0.0057,all levels
+Robin,ghost,L2,2,2.0029,0.0025,all levels
+Robin,ghost,Linf,2,1.9981,0.0015,all levels

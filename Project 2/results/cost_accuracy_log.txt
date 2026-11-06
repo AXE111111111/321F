@@ -1,0 +1,31 @@
+Target ||e||_inf <= 0.005
+Cost measure: median wall time of spsolve over 5 runs (assembly not counted).
+N candidates: [16, 32, 64, 128, 256, 512]
+Neumann first N= 16 M=   240 Linf=5.832e-02 t_med=3.7460e-04s  times=['3.910e-04', '3.746e-04', '3.596e-04', '3.579e-04', '3.800e-04']
+Neumann first N= 32 M=   992 Linf=2.815e-02 t_med=1.5162e-03s  times=['1.527e-03', '1.369e-03', '1.496e-03', '1.530e-03', '1.516e-03']
+Neumann first N= 64 M=  4032 Linf=1.383e-02 t_med=6.2149e-03s  times=['6.390e-03', '6.215e-03', '6.170e-03', '6.240e-03', '5.973e-03']
+Neumann first N=128 M= 16256 Linf=6.853e-03 t_med=3.7668e-02s  times=['3.909e-02', '3.743e-02', '3.763e-02', '3.844e-02', '3.767e-02']
+Neumann first N=256 M= 65280 Linf=3.411e-03 t_med=2.4649e-01s  times=['2.473e-01', '2.443e-01', '2.465e-01', '2.464e-01', '2.472e-01']
+Neumann first N=512 M=261632 Linf=1.702e-03 t_med=1.7257e+00s  times=['1.730e+00', '1.698e+00', '1.726e+00', '1.822e+00', '1.713e+00']
+>>> smallest N for Neumann/first: {'bc': 'Neumann', 'closure': 'first', 'N': 256, 'h': 0.00390625, 'M': 65280, 'Linf': 0.0034109175226753052, 't_spsolve_s': 0.24649227000190876, 'tol': 0.005, 'counted': 'median spsolve wall time only', 'not_counted': 'assembly, I/O, CG, plotting, Python outside spsolve'}
+Neumann ghost N= 16 M=   240 Linf=8.611e-04 t_med=3.4819e-04s  times=['3.482e-04', '3.702e-04', '3.233e-04', '3.162e-04', '3.487e-04']
+Neumann ghost N= 32 M=   992 Linf=2.163e-04 t_med=1.6444e-03s  times=['1.399e-03', '1.429e-03', '1.695e-03', '1.861e-03', '1.644e-03']
+Neumann ghost N= 64 M=  4032 Linf=5.412e-05 t_med=6.0628e-03s  times=['5.901e-03', '6.085e-03', '5.702e-03', '6.064e-03', '6.063e-03']
+Neumann ghost N=128 M= 16256 Linf=1.354e-05 t_med=4.1737e-02s  times=['4.242e-02', '4.174e-02', '4.154e-02', '4.173e-02', '4.178e-02']
+Neumann ghost N=256 M= 65280 Linf=3.385e-06 t_med=2.5514e-01s  times=['2.461e-01', '2.551e-01', '2.556e-01', '2.564e-01', '2.455e-01']
+Neumann ghost N=512 M=261632 Linf=8.461e-07 t_med=1.8060e+00s  times=['1.854e+00', '1.806e+00', '1.800e+00', '1.800e+00', '1.812e+00']
+>>> smallest N for Neumann/ghost: {'bc': 'Neumann', 'closure': 'ghost', 'N': 16, 'h': 0.0625, 'M': 240, 'Linf': 0.0008610566341964443, 't_spsolve_s': 0.00034818900167010725, 'tol': 0.005, 'counted': 'median spsolve wall time only', 'not_counted': 'assembly, I/O, CG, plotting, Python outside spsolve'}
+Robin   first N= 16 M=   240 Linf=3.430e-02 t_med=3.3948e-04s  times=['4.300e-04', '3.451e-04', '3.395e-04', '3.326e-04', '3.197e-04']
+Robin   first N= 32 M=   992 Linf=1.685e-02 t_med=1.4937e-03s  times=['1.494e-03', '1.495e-03', '1.558e-03', '1.434e-03', '1.337e-03']
+Robin   first N= 64 M=  4032 Linf=8.355e-03 t_med=6.1150e-03s  times=['5.907e-03', '6.115e-03', '5.876e-03', '6.179e-03', '6.243e-03']
+Robin   first N=128 M= 16256 Linf=4.159e-03 t_med=3.7985e-02s  times=['3.860e-02', '3.809e-02', '3.798e-02', '3.764e-02', '3.785e-02']
+Robin   first N=256 M= 65280 Linf=2.075e-03 t_med=2.4618e-01s  times=['2.462e-01', '2.437e-01', '2.428e-01', '2.504e-01', '2.491e-01']
+Robin   first N=512 M=261632 Linf=1.036e-03 t_med=1.6835e+00s  times=['1.679e+00', '1.702e+00', '1.684e+00', '1.690e+00', '1.666e+00']
+>>> smallest N for Robin/first: {'bc': 'Robin', 'closure': 'first', 'N': 128, 'h': 0.0078125, 'M': 16256, 'Linf': 0.004158720398731219, 't_spsolve_s': 0.03798483600257896, 'tol': 0.005, 'counted': 'median spsolve wall time only', 'not_counted': 'assembly, I/O, CG, plotting, Python outside spsolve'}
+Robin   ghost N= 16 M=   240 Linf=5.307e-04 t_med=3.2296e-04s  times=['3.238e-04', '3.230e-04', '2.996e-04', '3.244e-04', '2.987e-04']
+Robin   ghost N= 32 M=   992 Linf=1.332e-04 t_med=1.3832e-03s  times=['1.609e-03', '1.377e-03', '1.390e-03', '1.383e-03', '1.371e-03']
+Robin   ghost N= 64 M=  4032 Linf=3.335e-05 t_med=5.8931e-03s  times=['5.798e-03', '5.915e-03', '5.859e-03', '6.470e-03', '5.893e-03']
+Robin   ghost N=128 M= 16256 Linf=8.340e-06 t_med=3.6077e-02s  times=['3.760e-02', '3.686e-02', '3.608e-02', '3.594e-02', '3.557e-02']
+Robin   ghost N=256 M= 65280 Linf=2.085e-06 t_med=2.3410e-01s  times=['2.341e-01', '2.383e-01', '2.338e-01', '2.366e-01', '2.297e-01']
+Robin   ghost N=512 M=261632 Linf=5.213e-07 t_med=1.8158e+00s  times=['1.834e+00', '1.816e+00', '1.799e+00', '1.844e+00', '1.816e+00']
+>>> smallest N for Robin/ghost: {'bc': 'Robin', 'closure': 'ghost', 'N': 16, 'h': 0.0625, 'M': 240, 'Linf': 0.0005307316584186594, 't_spsolve_s': 0.0003229569992981851, 'tol': 0.005, 'counted': 'median spsolve wall time only', 'not_counted': 'assembly, I/O, CG, plotting, Python outside spsolve'}

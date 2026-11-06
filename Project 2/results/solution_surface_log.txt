@@ -1,0 +1,1 @@
+ghost Robin beta=2.0 N=64: max|U-u*|=3.335054e-05 at (x,y)=(1.0000,0.7031)

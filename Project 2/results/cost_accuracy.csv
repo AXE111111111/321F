@@ -1,0 +1,5 @@
+bc,closure,N,h,M,Linf,t_spsolve_s,tol,counted,not_counted
+Neumann,first,256,0.00390625,65280,0.0034109175226753052,0.24649227000190876,0.005,median spsolve wall time only,"assembly, I/O, CG, plotting, Python outside spsolve"
+Neumann,ghost,16,0.0625,240,0.0008610566341964443,0.00034818900167010725,0.005,median spsolve wall time only,"assembly, I/O, CG, plotting, Python outside spsolve"
+Robin,first,128,0.0078125,16256,0.004158720398731219,0.03798483600257896,0.005,median spsolve wall time only,"assembly, I/O, CG, plotting, Python outside spsolve"
+Robin,ghost,16,0.0625,240,0.0005307316584186594,0.0003229569992981851,0.005,median spsolve wall time only,"assembly, I/O, CG, plotting, Python outside spsolve"
