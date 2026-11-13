@@ -1,0 +1,33 @@
+bc,closure,norm,window,n_levels,fitted_order,max_log_dev
+Neumann,first,L2,all levels,6,1.0176,0.0151
+Neumann,first,L2,N>=64,4,1.0071,0.0019
+Neumann,first,Linf,all levels,6,0.9890,0.0095
+Neumann,first,Linf,N>=64,4,0.9956,0.0012
+Neumann,first,Linf_near,all levels,6,0.9890,0.0095
+Neumann,first,Linf_near,N>=64,4,0.9956,0.0012
+Neumann,first,Linf_far,all levels,6,1.0093,0.0083
+Neumann,first,Linf_far,N>=64,4,1.0037,0.0010
+Neumann,ghost,L2,all levels,6,1.8845,0.0236
+Neumann,ghost,L2,N>=64,4,1.9028,0.0049
+Neumann,ghost,Linf,all levels,6,0.9994,0.0010
+Neumann,ghost,Linf,N>=64,4,0.9999,0.0000
+Neumann,ghost,Linf_near,all levels,6,0.9994,0.0010
+Neumann,ghost,Linf_near,N>=64,4,0.9999,0.0000
+Neumann,ghost,Linf_far,all levels,6,2.0083,0.0137
+Neumann,ghost,Linf_far,N>=64,4,2.0008,0.0004
+Robin,first,L2,all levels,6,1.0104,0.0072
+Robin,first,L2,N>=64,4,1.0048,0.0013
+Robin,first,Linf,all levels,6,0.9266,0.0495
+Robin,first,Linf,N>=64,4,0.9631,0.0081
+Robin,first,Linf_near,all levels,6,0.9266,0.0495
+Robin,first,Linf_near,N>=64,4,0.9631,0.0081
+Robin,first,Linf_far,all levels,6,0.9981,0.0013
+Robin,first,Linf_far,N>=64,4,0.9991,0.0002
+Robin,ghost,L2,all levels,6,1.8386,0.0379
+Robin,ghost,L2,N>=64,4,1.8684,0.0081
+Robin,ghost,Linf,all levels,6,0.9681,0.0246
+Robin,ghost,Linf,N>=64,4,0.9858,0.0036
+Robin,ghost,Linf_near,all levels,6,0.9681,0.0246
+Robin,ghost,Linf_near,N>=64,4,0.9858,0.0036
+Robin,ghost,Linf_far,all levels,6,2.0108,0.0200
+Robin,ghost,Linf_far,N>=64,4,2.0012,0.0016

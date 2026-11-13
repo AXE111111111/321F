@@ -1,4 +1,4 @@
-# Re-run 2026-11-03 (Asia/Shanghai) via python3 bank_vs_solver.py; numbers unchanged from 2026-10-29 log.
+# Re-run 2026-11-13 (Asia/Shanghai) via python validation/bank_vs_solver.py; numbers unchanged since the 2026-10-29 log.
 P1 trigonometric mode (Dirichlet)                       first errs=3.54e-03 8.41e-04 2.05e-04 5.06e-05  order=2.04
 P1 trigonometric mode (Dirichlet)                       ghost errs=3.19e-03 8.00e-04 2.00e-04 5.00e-05  order=2.00
 P2 harmonic polynomial (Dirichlet)                      first errs=2.51e-02 1.20e-02 5.90e-03 2.92e-03  order=1.03

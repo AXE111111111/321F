@@ -1,0 +1,63 @@
+Incompatible-corner experiment log
+R_SPLIT=0.25 (near: r < 0.25, far: r >= 0.25)
+NS=[16, 32, 64, 128, 256, 512]
+FIT windows: all levels, and N>=64 (declared a priori)
+
+Neumann first N= 16 h=0.062500  L2=1.169065e-02 p_L2=nan  Linf=5.405785e-02 p_Linf=nan  L2_near=5.646289e-03 Linf_near=5.405785e-02 p=nan  L2_far=1.023673e-02 Linf_far=4.102227e-02 p=nan  n_near=11 n_far=229  max@(1.000000,0.062500) r=0.062500  tau_max=1.268579e+00 tau_near=1.268579e+00 tau_far=1.237294e-01  tau_B=4.388246e-01 tau_I=1.268579e+00  scaled_res=5.740e-15  0.001s
+Neumann first N= 32 h=0.031250  L2=5.651455e-03 p_L2=1.0487  Linf=2.761098e-02 p_Linf=0.9693  L2_near=2.761322e-03 Linf_near=2.761098e-02 p=0.9693  L2_far=4.930928e-03 Linf_far=2.013672e-02 p=1.0266  n_near=48 n_far=944  max@(1.000000,0.031250) r=0.031250  tau_max=2.537159e+00 tau_near=2.537159e+00 tau_far=6.233825e-02  tau_B=4.388246e-01 tau_I=2.537159e+00  scaled_res=1.794e-14  0.002s
+Neumann first N= 64 h=0.015625  L2=2.777505e-03 p_L2=1.0248  Linf=1.395190e-02 p_Linf=0.9848  L2_near=1.358340e-03 Linf_near=1.395190e-02 p=0.9848  L2_far=2.422695e-03 Linf_far=9.979644e-03 p=1.0128  n_near=198 n_far=3834  max@(1.000000,0.015625) r=0.015625  tau_max=5.074317e+00 tau_near=5.074317e+00 tau_far=3.122969e-02  tau_B=4.388246e-01 tau_I=5.074317e+00  scaled_res=1.234e-13  0.009s
+Neumann first N=128 h=0.007812  L2=1.376903e-03 p_L2=1.0124  Linf=7.012677e-03 p_Linf=0.9924  L2_near=6.724022e-04 Linf_near=7.012677e-03 p=0.9924  L2_far=1.201556e-03 Linf_far=4.967907e-03 p=1.0064  n_near=801 n_far=15455  max@(1.000000,0.007812) r=0.007812  tau_max=1.014863e+01 tau_near=1.014863e+01 tau_far=1.562246e-02  tau_B=4.388246e-01 tau_I=1.014863e+01  scaled_res=1.733e-13  0.047s
+Neumann first N=256 h=0.003906  L2=6.855376e-04 p_L2=1.0061  Linf=3.515536e-03 p_Linf=0.9962  L2_near=3.342107e-04 Linf_near=3.515536e-03 p=0.9962  L2_far=5.985524e-04 Linf_far=2.478490e-03 p=1.0032  n_near=3212 n_far=62068  max@(1.000000,0.003906) r=0.003906  tau_max=2.029727e+01 tau_near=2.029727e+01 tau_far=7.812182e-03  tau_B=4.388246e-01 tau_I=2.029727e+01  scaled_res=5.362e-13  0.271s
+Neumann first N=512 h=0.001953  L2=3.420492e-04 p_L2=1.0030  Linf=1.760069e-03 p_Linf=0.9981  L2_near=1.665610e-04 Linf_near=1.760069e-03 p=0.9981  L2_far=2.987559e-04 Linf_far=1.237880e-03 p=1.0016  n_near=12857 n_far=248775  max@(1.000000,0.001953) r=0.001953  tau_max=4.059454e+01 tau_near=4.059454e+01 tau_far=3.906210e-03  tau_B=4.388246e-01 tau_I=4.059454e+01  scaled_res=1.545e-12  1.808s
+Neumann ghost N= 16 h=0.062500  L2=7.609726e-04 p_L2=nan  Linf=1.050076e-02 p_Linf=nan  L2_near=6.361555e-04 Linf_near=1.050076e-02 p=nan  L2_far=4.175949e-04 Linf_far=2.580037e-03 p=nan  n_near=11 n_far=229  max@(1.000000,0.062500) r=0.062500  tau_max=8.138323e+00 tau_near=8.138323e+00 tau_far=8.340320e-02  tau_B=8.138323e+00 tau_I=1.268579e+00  scaled_res=1.962e-16  0.007s
+Neumann ghost N= 32 h=0.031250  L2=2.126215e-04 p_L2=1.8396  Linf=5.260922e-03 p_Linf=0.9971  L2_near=1.867921e-04 Linf_near=5.260922e-03 p=0.9971  L2_far=1.015709e-04 Linf_far=6.269907e-04 p=2.0409  n_near=48 n_far=944  max@(1.000000,0.031250) r=0.031250  tau_max=1.627665e+01 tau_near=1.627665e+01 tau_far=2.083442e-02  tau_B=1.627665e+01 tau_I=2.537159e+00  scaled_res=2.849e-16  0.002s
+Neumann ghost N= 64 h=0.015625  L2=5.821399e-05 p_L2=1.8689  Linf=2.631776e-03 p_Linf=0.9993  L2_near=5.252936e-05 Linf_near=2.631776e-03 p=0.9993  L2_far=2.509054e-05 Linf_far=1.558724e-04 p=2.0081  n_near=198 n_far=3834  max@(1.000000,0.015625) r=0.015625  tau_max=3.255329e+01 tau_near=3.255329e+01 tau_far=5.208350e-03  tau_B=3.255329e+01 tau_I=5.074317e+00  scaled_res=6.605e-16  0.008s
+Neumann ghost N=128 h=0.007812  L2=1.571667e-05 p_L2=1.8891  Linf=1.316052e-03 p_Linf=0.9998  L2_near=1.442185e-05 Linf_near=1.316052e-03 p=0.9998  L2_far=6.246903e-06 Linf_far=3.891663e-05 p=2.0019  n_near=801 n_far=15455  max@(1.000000,0.007812) r=0.007812  tau_max=6.510659e+01 tau_near=6.510659e+01 tau_far=1.302084e-03  tau_B=6.510659e+01 tau_I=1.014863e+01  scaled_res=5.246e-16  0.042s
+Neumann ghost N=256 h=0.003906  L2=4.199872e-06 p_L2=1.9039  Linf=6.580468e-04 p_Linf=1.0000  L2_near=3.899562e-06 Linf_near=6.580468e-04 p=1.0000  L2_far=1.559595e-06 Linf_far=9.725983e-06 p=2.0005  n_near=3212 n_far=62068  max@(1.000000,0.003906) r=0.003906  tau_max=1.302132e+02 tau_near=1.302132e+02 tau_far=3.255208e-04  tau_B=1.302132e+02 tau_I=2.029727e+01  scaled_res=2.580e-15  0.264s
+Neumann ghost N=512 h=0.001953  L2=1.113538e-06 p_L2=1.9152  Linf=3.290260e-04 p_Linf=1.0000  L2_near=1.043099e-06 Linf_near=3.290260e-04 p=1.0000  L2_far=3.897585e-07 Linf_far=2.431298e-06 p=2.0001  n_near=12857 n_far=248775  max@(1.000000,0.001953) r=0.001953  tau_max=2.604264e+02 tau_near=2.604264e+02 tau_far=8.138020e-05  tau_B=2.604264e+02 tau_I=4.059454e+01  scaled_res=1.857e-15  1.940s
+Robin   first N= 16 h=0.062500  L2=7.246590e-03 p_L2=nan  Linf=4.248894e-02 p_Linf=nan  L2_near=4.022277e-03 Linf_near=4.248894e-02 p=nan  L2_far=6.027799e-03 Linf_far=2.549015e-02 p=nan  n_near=11 n_far=229  max@(1.000000,0.062500) r=0.062500  tau_max=1.268579e+00 tau_near=1.268579e+00 tau_far=1.237294e-01  tau_B=4.388246e-01 tau_I=1.268579e+00  scaled_res=1.102e-14  0.005s
+Robin   first N= 32 h=0.031250  L2=3.562702e-03 p_L2=1.0243  Linf=2.393052e-02 p_Linf=0.8282  L2_near=2.003545e-03 Linf_near=2.393052e-02 p=0.8282  L2_far=2.945956e-03 Linf_far=1.278348e-02 p=0.9957  n_near=48 n_far=944  max@(1.000000,0.031250) r=0.031250  tau_max=2.537159e+00 tau_near=2.537159e+00 tau_far=6.233825e-02  tau_B=4.388246e-01 tau_I=2.537159e+00  scaled_res=2.727e-14  0.002s
+Robin   first N= 64 h=0.015625  L2=1.762517e-03 p_L2=1.0153  Linf=1.284187e-02 p_Linf=0.8980  L2_near=9.908258e-04 Linf_near=1.284187e-02 p=0.8980  L2_far=1.457645e-03 Linf_far=6.405033e-03 p=0.9970  n_near=198 n_far=3834  max@(1.000000,0.015625) r=0.015625  tau_max=5.074317e+00 tau_near=5.074317e+00 tau_far=3.122969e-02  tau_B=4.388246e-01 tau_I=5.074317e+00  scaled_res=1.715e-13  0.008s
+Robin   first N=128 h=0.007812  L2=8.762026e-04 p_L2=1.0083  Linf=6.689429e-03 p_Linf=0.9409  L2_near=4.913492e-04 Linf_near=6.689429e-03 p=0.9409  L2_far=7.254702e-04 Linf_far=3.206012e-03 p=0.9984  n_near=801 n_far=15455  max@(1.000000,0.007812) r=0.007812  tau_max=1.014863e+01 tau_near=1.014863e+01 tau_far=1.562246e-02  tau_B=4.388246e-01 tau_I=1.014863e+01  scaled_res=1.089e-13  0.041s
+Robin   first N=256 h=0.003906  L2=4.368194e-04 p_L2=1.0042  Linf=3.423614e-03 p_Linf=0.9664  L2_near=2.444120e-04 Linf_near=3.423614e-03 p=0.9664  L2_far=3.620414e-04 Linf_far=1.603886e-03 p=0.9992  n_near=3212 n_far=62068  max@(1.000000,0.003906) r=0.003906  tau_max=2.029727e+01 tau_near=2.029727e+01 tau_far=7.812182e-03  tau_B=4.388246e-01 tau_I=2.029727e+01  scaled_res=4.340e-13  0.263s
+Robin   first N=512 h=0.001953  L2=2.180909e-04 p_L2=1.0021  Linf=1.734366e-03 p_Linf=0.9811  L2_near=1.218590e-04 Linf_near=1.734366e-03 p=0.9811  L2_far=1.808702e-04 Linf_far=8.021624e-04 p=0.9996  n_near=12857 n_far=248775  max@(1.000000,0.001953) r=0.001953  tau_max=4.059454e+01 tau_near=4.059454e+01 tau_far=3.906210e-03  tau_B=4.388246e-01 tau_I=4.059454e+01  scaled_res=1.931e-12  1.817s
+Robin   ghost N= 16 h=0.062500  L2=5.663466e-04 p_L2=nan  Linf=9.317119e-03 p_Linf=nan  L2_near=5.193064e-04 Linf_near=9.317119e-03 p=nan  L2_far=2.259853e-04 Linf_far=1.582672e-03 p=nan  n_near=11 n_far=229  max@(1.000000,0.062500) r=0.062500  tau_max=8.138323e+00 tau_near=8.138323e+00 tau_far=8.340320e-02  tau_B=8.138323e+00 tau_I=1.268579e+00  scaled_res=2.436e-16  0.007s
+Robin   ghost N= 32 h=0.031250  L2=1.664044e-04 p_L2=1.7670  Linf=4.930052e-03 p_Linf=0.9183  L2_near=1.574310e-04 Linf_near=4.930052e-03 p=0.9183  L2_far=5.390644e-05 Linf_far=3.793257e-04 p=2.0609  n_near=48 n_far=944  max@(1.000000,0.031250) r=0.031250  tau_max=1.627665e+01 tau_near=1.627665e+01 tau_far=2.083442e-02  tau_B=1.627665e+01 tau_I=2.537159e+00  scaled_res=5.206e-16  0.002s
+Robin   ghost N= 64 h=0.015625  L2=4.737220e-05 p_L2=1.8126  Linf=2.543211e-03 p_Linf=0.9550  L2_near=4.549783e-05 Linf_near=2.543211e-03 p=0.9550  L2_far=1.319366e-05 Linf_far=9.458926e-05 p=2.0037  n_near=198 n_far=3834  max@(1.000000,0.015625) r=0.015625  tau_max=3.255329e+01 tau_near=3.255329e+01 tau_far=5.208350e-03  tau_B=3.255329e+01 tau_I=5.074317e+00  scaled_res=5.950e-16  0.008s
+Robin   ghost N=128 h=0.007812  L2=1.317982e-05 p_L2=1.8457  Linf=1.292980e-03 p_Linf=0.9760  L2_near=1.276688e-05 Linf_near=1.292980e-03 p=0.9760  L2_far=3.273320e-06 Linf_far=2.355950e-05 p=2.0054  n_near=801 n_far=15455  max@(1.000000,0.007812) r=0.007812  tau_max=6.510659e+01 tau_near=6.510659e+01 tau_far=1.302084e-03  tau_B=6.510659e+01 tau_I=1.014863e+01  scaled_res=8.524e-16  0.044s
+Robin   ghost N=256 h=0.003906  L2=3.605074e-06 p_L2=1.8702  Linf=6.521362e-04 p_Linf=0.9875  L2_near=3.511524e-06 Linf_near=6.521362e-04 p=0.9875  L2_far=8.159427e-07 Linf_far=5.884072e-06 p=2.0014  n_near=3212 n_far=62068  max@(1.000000,0.003906) r=0.003906  tau_max=1.302132e+02 tau_near=1.302132e+02 tau_far=3.255208e-04  tau_B=1.302132e+02 tau_I=2.029727e+01  scaled_res=2.452e-15  0.267s
+Robin   ghost N=512 h=0.001953  L2=9.735262e-07 p_L2=1.8887  Linf=3.275272e-04 p_Linf=0.9936  L2_near=9.519585e-07 Linf_near=3.275272e-04 p=0.9936  L2_far=2.037851e-07 Linf_far=1.474273e-06 p=1.9968  n_near=12857 n_far=248775  max@(1.000000,0.001953) r=0.001953  tau_max=2.604264e+02 tau_near=2.604264e+02 tau_far=8.138020e-05  tau_B=2.604264e+02 tau_I=4.059454e+01  scaled_res=4.005e-15  1.887s
+
+Fitted orders
+Neumann first L2         [all levels] n=6  slope=1.0176  max_ln_dev=0.0151
+Neumann first L2         [N>=64] n=4  slope=1.0071  max_ln_dev=0.0019
+Neumann first Linf       [all levels] n=6  slope=0.9890  max_ln_dev=0.0095
+Neumann first Linf       [N>=64] n=4  slope=0.9956  max_ln_dev=0.0012
+Neumann first Linf_near  [all levels] n=6  slope=0.9890  max_ln_dev=0.0095
+Neumann first Linf_near  [N>=64] n=4  slope=0.9956  max_ln_dev=0.0012
+Neumann first Linf_far   [all levels] n=6  slope=1.0093  max_ln_dev=0.0083
+Neumann first Linf_far   [N>=64] n=4  slope=1.0037  max_ln_dev=0.0010
+Neumann ghost L2         [all levels] n=6  slope=1.8845  max_ln_dev=0.0236
+Neumann ghost L2         [N>=64] n=4  slope=1.9028  max_ln_dev=0.0049
+Neumann ghost Linf       [all levels] n=6  slope=0.9994  max_ln_dev=0.0010
+Neumann ghost Linf       [N>=64] n=4  slope=0.9999  max_ln_dev=0.0000
+Neumann ghost Linf_near  [all levels] n=6  slope=0.9994  max_ln_dev=0.0010
+Neumann ghost Linf_near  [N>=64] n=4  slope=0.9999  max_ln_dev=0.0000
+Neumann ghost Linf_far   [all levels] n=6  slope=2.0083  max_ln_dev=0.0137
+Neumann ghost Linf_far   [N>=64] n=4  slope=2.0008  max_ln_dev=0.0004
+Robin   first L2         [all levels] n=6  slope=1.0104  max_ln_dev=0.0072
+Robin   first L2         [N>=64] n=4  slope=1.0048  max_ln_dev=0.0013
+Robin   first Linf       [all levels] n=6  slope=0.9266  max_ln_dev=0.0495
+Robin   first Linf       [N>=64] n=4  slope=0.9631  max_ln_dev=0.0081
+Robin   first Linf_near  [all levels] n=6  slope=0.9266  max_ln_dev=0.0495
+Robin   first Linf_near  [N>=64] n=4  slope=0.9631  max_ln_dev=0.0081
+Robin   first Linf_far   [all levels] n=6  slope=0.9981  max_ln_dev=0.0013
+Robin   first Linf_far   [N>=64] n=4  slope=0.9991  max_ln_dev=0.0002
+Robin   ghost L2         [all levels] n=6  slope=1.8386  max_ln_dev=0.0379
+Robin   ghost L2         [N>=64] n=4  slope=1.8684  max_ln_dev=0.0081
+Robin   ghost Linf       [all levels] n=6  slope=0.9681  max_ln_dev=0.0246
+Robin   ghost Linf       [N>=64] n=4  slope=0.9858  max_ln_dev=0.0036
+Robin   ghost Linf_near  [all levels] n=6  slope=0.9681  max_ln_dev=0.0246
+Robin   ghost Linf_near  [N>=64] n=4  slope=0.9858  max_ln_dev=0.0036
+Robin   ghost Linf_far   [all levels] n=6  slope=2.0108  max_ln_dev=0.0200
+Robin   ghost Linf_far   [N>=64] n=4  slope=2.0012  max_ln_dev=0.0016

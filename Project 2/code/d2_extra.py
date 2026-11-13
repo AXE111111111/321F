@@ -1,17 +1,21 @@
-"""Report support for Direction 2 (Zekun Wang). Reuses build() from ticket_d2_study.py
-(copied verbatim) without re-running its study loop; computes truncation checks,
-symmetrisation checks, scaled residuals, and draws Palatino figures."""
-import sys, glob, numpy as np, scipy.sparse as sp, scipy.sparse.linalg as spla, csv
-import matplotlib; matplotlib.use("Agg")
-from matplotlib import font_manager as fm, pyplot as plt
-src=open("ticket_d2_study.py").read().split("rows=[]")[0]; exec(src)   # defines ue, build
-for f in glob.glob("/usr/share/texmf/fonts/opentype/public/tex-gyre/texgyrepagella-*.otf")+glob.glob("/usr/share/texlive/texmf-dist/fonts/opentype/public/tex-gyre/texgyrepagella-*.otf"): fm.fontManager.addfont(f)
-matplotlib.rcParams.update({"font.family":"serif","font.serif":["TeX Gyre Pagella"],"mathtext.fontset":"custom",
- "mathtext.rm":"TeX Gyre Pagella","mathtext.it":"TeX Gyre Pagella:italic","mathtext.bf":"TeX Gyre Pagella:bold",
- "axes.spines.top":False,"axes.spines.right":False,"font.size":9,"axes.linewidth":0.6,"lines.linewidth":1.0,
- "lines.markersize":4,"legend.frameon":False,"pdf.fonttype":42})
+"""Legacy report-support script for Direction 2 (Week 6). Superseded by run_all.py.
+
+Reuses build() from ticket_d2_study.py (imported, not re-run), recomputes the truncation,
+symmetrisation and scaled-residual checks with the original loop assembly, and draws the
+early figures. Every output goes to ../results/legacy_d2_extra/, so running this script can
+never overwrite the report figures or the CSVs produced by run_all.py.
+"""
+import os, csv
+import numpy as np, scipy.sparse as sp, scipy.sparse.linalg as spla
+from matplotlib import pyplot as plt
+import plotstyle
+from ticket_d2_study import build
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+plotstyle.setup()
 NAVY,BRICK,SAGE,GREY="#2b3f5c","#9c4a3c","#6b8e6b","#7a7a7a"
-FIG="../report/figures/"; out=open("../results/d2_extra_log.txt","w")
+OUT=os.path.join(HERE,"..","results","legacy_d2_extra"); os.makedirs(OUT,exist_ok=True)
+FIG=OUT+os.sep; out=open(os.path.join(OUT,"d2_extra_log.txt"),"w")
 def P(*a): print(*a); print(*a,file=out)
 # 1. truncation check: apply A to exact nodal values
 rows=[]
@@ -27,7 +31,7 @@ for beta,lab in [(2.0,"Robin"),(0.0,"Neumann")]:
       rows.append(dict(bc=lab,closure=cl,N=N,h=h,tauB=np.abs(tau[b]).max(),tauI=np.abs(tau[~b]).max(),
           etaA=spla.norm(A-A.T)/spla.norm(A),etaS=etaS,scaled_res=sres))
       P(f"{lab:7s} {cl:5s} N={N:3d} max|tau_B|={rows[-1]['tauB']:.3e} (/h={rows[-1]['tauB']/h:.4f}) max|tau_I|={rows[-1]['tauI']:.3e} (/h^2={rows[-1]['tauI']/h**2:.4f}) eta(A)={rows[-1]['etaA']:.4f} eta(DA)={etaS:.1e} scaled_res={sres:.1e}")
-with open("../results/d2_extra.csv","w",newline="") as fh:
+with open(os.path.join(OUT,"d2_extra.csv"),"w",newline="") as fh:
     w=csv.DictWriter(fh,fieldnames=rows[0].keys()); w.writeheader(); w.writerows(rows)
 P("predicted |tau_B|/h: first 0.5*e^2(1+y) max ->", 0.5*np.e**2, " ghost (1/3)e^2 ->", np.e**2/3, "; |tau_I|/h^2 -> e^2/6 =",np.e**2/6)
 # 2. CG on symmetrised systems, both closures, N=64
@@ -43,7 +47,7 @@ class _T:
     def __init__(s,rows): s.r=rows
     def __getattr__(s,k): return np.array([x[k] for x in s.r])
     def sel(s,**kw): return _T([x for x in s.r if all(x[a]==b for a,b in kw.items())])
-d=_T([{k:(float(v) if k not in("bc","closure") else v) for k,v in x.items()} for x in csv.DictReader(open("ticket_d2_results.csv"))])
+d=_T([{k:(float(v) if k not in("bc","closure") else v) for k,v in x.items()} for x in csv.DictReader(open(os.path.join(HERE,"ticket_d2_results.csv")))])
 fig,ax=plt.subplots(1,2,figsize=(6.4,2.7),sharey=True)
 for a,bc in zip(ax,["Neumann","Robin"]):
   for cl,c,m in [("first",BRICK,"o"),("ghost",NAVY,"s")]:

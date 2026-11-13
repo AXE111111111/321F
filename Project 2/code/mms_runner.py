@@ -5,13 +5,12 @@ Writes ../results/mms_checks.csv and appends a human log to ../results/mms_check
 Also refreshes ../results/d2_extra.csv for make_tables.py compatibility.
 """
 from __future__ import annotations
-import csv, os, time
+import csv, os
 import numpy as np
-import scipy.sparse as sp
 import scipy.sparse.linalg as spla
 from solver import (
     assemble, solve_direct, solve_cg, symmetrise, asymmetry,
-    scaled_residual, discrete_norms,
+    scaled_residual,
 )
 from mms import (
     u_star, f_star, g_star, r_star,
@@ -22,6 +21,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RES = os.path.join(HERE, "..", "results")
 os.makedirs(RES, exist_ok=True)
 NS = [16, 32, 64, 128, 256]
+
+
+def _eig(S, **kw):
+    """Extreme eigenvalue of SPD S; fixed start vector so ARPACK is deterministic."""
+    v0 = np.ones(S.shape[0])
+    return float(spla.eigsh(S, k=1, v0=v0, return_eigenvectors=False, **kw)[0])
 
 
 def run():
@@ -71,7 +76,7 @@ def run():
             S, G, D = symmetrise(A, F, I, h, cl)
             Ud = solve_direct(A, F)
             x, iters, relres, info = solve_cg(S, G, tol=1e-12)
-            lmin = float(spla.eigsh(S, k=1, sigma=0, which="LM", return_eigenvectors=False)[0])
+            lmin = _eig(S, sigma=0, which="LM")
             P(
                 f"CG {lab} {cl} N=64: info={info} iters={iters} "
                 f"|x-direct|_inf={np.abs(x-Ud).max():.2e} lambda_min(DA)={lmin:.4f}"
@@ -86,8 +91,8 @@ def run():
     sres = scaled_residual(A, U, F)
     # κ₂ estimate via extreme eigenvalues of the SPD matrix DA
     S, G, D = symmetrise(A, F, I, h, cl_c)
-    lmax = float(spla.eigsh(S, k=1, which="LA", return_eigenvectors=False)[0])
-    lmin = float(spla.eigsh(S, k=1, sigma=0, which="LM", return_eigenvectors=False)[0])
+    lmax = _eig(S, which="LA")
+    lmin = _eig(S, sigma=0, which="LM")
     kappa = lmax / lmin
     # crude 1-norm condition estimate of A via onenormest of A and of A^{-1} (via spsolve)
     Anorm = spla.onenormest(A)
@@ -104,12 +109,35 @@ def run():
         f"kappa2(DA)={kappa:.3e} (lmax={lmax:.4e}, lmin={lmin:.4e}) "
         f"kappa1(A)~{kappa1:.3e} (||A||1~{Anorm:.3e}, ||A^-1||1~{Ainv_norm:.3e})"
     )
+    # Forward algebraic-error bounds from the computed residual (report Section 4.2).
+    # (i) comparison-function bound (ghost): |U~ - U_h|_inf <= |r_I|/2 + (h/2)|r_B|;
+    # (ii) normwise bound from the componentwise backward error rho:
+    #      |U~ - U_h|_1/|U_h|_1 <= 2 kappa_1 rho / (1 - kappa_1 rho)  (Higham, Thm 7.2 type).
+    r_alg = F - A @ U
+    bmask = I == N_c
+    rI = float(np.abs(r_alg[~bmask]).max())
+    rB = float(np.abs(r_alg[bmask]).max())
+    cf_bound = 0.5 * rI + 0.5 * h * rB
+    kr = kappa1 * sres
+    kappa_bound = 2.0 * kr / (1.0 - kr)
+    P(
+        f"FWD Robin ghost N={N_c}: |r_I|_inf={rI:.3e} |r_B|_inf={rB:.3e} "
+        f"comparison bound |U~-U_h|_inf<={cf_bound:.3e}; "
+        f"kappa1*rho={kr:.3e} -> rel. 1-norm bound {kappa_bound:.3e}; "
+        f"|U|_inf={np.abs(U).max():.4f}"
+    )
+    with open(os.path.join(RES, "forward_error_bound.csv"), "w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(["bc", "closure", "N", "scaled_res", "rI_inf", "rB_inf", "cf_bound_inf",
+                    "kappa1_A", "kappa1_rho", "rel_bound_1norm", "kappa2_DA", "Uinf"])
+        w.writerow(["Robin", cl_c, N_c, sres, rI, rB, cf_bound, kappa1, kr, kappa_bound,
+                    kappa, float(np.abs(U).max())])
     # also N=128 for a second point
     for N_c2 in (128, 256):
         A2, F2, h2, I2, J2 = assemble(N_c2, beta_c, cl_c, f_star, g_star, lambda y: r_star(y, beta_c))
         S2, G2, D2 = symmetrise(A2, F2, I2, h2, cl_c)
-        lmax2 = float(spla.eigsh(S2, k=1, which="LA", return_eigenvectors=False)[0])
-        lmin2 = float(spla.eigsh(S2, k=1, sigma=0, which="LM", return_eigenvectors=False)[0])
+        lmax2 = _eig(S2, which="LA")
+        lmin2 = _eig(S2, sigma=0, which="LM")
         P(f"COND Robin ghost N={N_c2}: kappa2(DA)={lmax2/lmin2:.3e}")
 
     for path in (

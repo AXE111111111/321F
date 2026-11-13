@@ -5,7 +5,7 @@ Also writes ticket_d2_results.csv in this folder for backward compatibility
 with make_tables.py / d2_extra.py.
 """
 from __future__ import annotations
-import csv, os, sys
+import csv, os
 import numpy as np
 from solver import assemble, solve_direct, discrete_norms, asymmetry
 from mms import u_star, f_star, g_star, r_star

@@ -61,6 +61,7 @@ def run(tol=TOL):
                 all_pts.append(dict(
                     bc=lab, closure=cl, N=N, h=h, M=M,
                     L2=L2, Linf=Linf, t_spsolve_s=tmed,
+                    t_min_s=float(min(ts)), t_max_s=float(max(ts)),
                 ))
                 P(
                     f"{lab:7s} {cl:5s} N={N:3d} M={M:6d} Linf={Linf:.3e} "
@@ -72,6 +73,7 @@ def run(tol=TOL):
                         Linf=Linf, t_spsolve_s=tmed, tol=tol,
                         counted="median spsolve wall time only",
                         not_counted="assembly, I/O, CG, plotting, Python outside spsolve",
+                        t_min_s=float(min(ts)), t_max_s=float(max(ts)),
                     )
             if hit is None:
                 hit = dict(
@@ -80,6 +82,7 @@ def run(tol=TOL):
                     counted="median spsolve wall time only",
                     not_counted="assembly, I/O, CG, plotting, Python outside spsolve; "
                                 f"no N≤{NS[-1]} reached tol={tol:g}",
+                    t_min_s=None, t_max_s=None,
                 )
                 P(f"{lab:7s} {cl:5s} DID NOT reach tol={tol:g} by N={NS[-1]}")
             rows.append(hit)

@@ -1,0 +1,11 @@
+\begin{tabular}{@{}llcccc@{}}\toprule
+Closure & solver & $\|e\|_\infty$ at $N=256$ & last-pair $p_\infty$ & fit $p_\infty$ & fit $p_{L^2_h}$\\\midrule
+ghost-point & direct \texttt{spsolve} & $2.085\times10^{-6}$ & 2.00 & 2.00 & 2.00\\
+ghost-point & CG, tol $10^{-8}$ (925 it.) & $2.443\times10^{-6}$ & 1.78 & 1.95 & 1.98\\
+ghost-point & CG, tol $10^{-10}$ (1087 it.) & $2.083\times10^{-6}$ & 2.00 & 2.00 & 2.00\\
+\midrule
+first-order & direct \texttt{spsolve} & $2.075\times10^{-3}$ & 1.00 & 1.01 & 1.02\\
+first-order & CG, tol $10^{-8}$ (923 it.) & $2.074\times10^{-3}$ & 1.00 & 1.01 & 1.02\\
+first-order & CG, tol $10^{-10}$ (1091 it.) & $2.075\times10^{-3}$ & 1.00 & 1.01 & 1.02\\
+\bottomrule
+\end{tabular}

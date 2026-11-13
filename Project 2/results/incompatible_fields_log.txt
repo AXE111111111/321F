@@ -1,0 +1,5 @@
+error-field figure, N=64, r_split=0.25
+Neumann first: max|U-u*|=1.395190e-02 at (x,y)=(1.0000,0.0156)
+Neumann ghost: max|U-u*|=2.631776e-03 at (x,y)=(1.0000,0.0156)
+Robin first: max|U-u*|=1.284187e-02 at (x,y)=(1.0000,0.0156)
+Robin ghost: max|U-u*|=2.543211e-03 at (x,y)=(1.0000,0.0156)

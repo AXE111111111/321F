@@ -18,8 +18,12 @@ Neumann ghost N= 32 max|tau_B|=7.344e-02 (/h=2.3501) max|tau_I|=1.130e-03 (/h^2=
 Neumann ghost N= 64 max|tau_B|=3.759e-02 (/h=2.4059) max|tau_I|=2.914e-04 (/h^2=1.1936) eta(A)=0.0395 eta(DA)=0.0e+00 scaled_res=3.7e-16
 Neumann ghost N=128 max|tau_B|=1.902e-02 (/h=2.4343) max|tau_I|=7.400e-05 (/h^2=1.2124) eta(A)=0.0280 eta(DA)=0.0e+00 scaled_res=4.0e-16
 Neumann ghost N=256 max|tau_B|=9.565e-03 (/h=2.4486) max|tau_I|=1.865e-05 (/h^2=1.2219) eta(A)=0.0198 eta(DA)=0.0e+00 scaled_res=7.2e-16
-predicted |tau_B|/h: first 0.5*e^2(1+y) max -> 3.6945280494653248  ghost (1/3)e^2 -> 2.4630186996435497 ; |tau_I|/h^2 -> e^2/6 = 1.2315093498217748
+predicted |tau_B|/h: first 3.6945280494653248  ghost 2.4630186996435497 ; |tau_I|/h^2 1.2315093498217748
 CG Robin first N=64: info=0 iters=316 |x-direct|_inf=7.58e-12 lambda_min(DA)=14.9198
 CG Robin ghost N=64: info=0 iters=309 |x-direct|_inf=8.83e-12 lambda_min(DA)=14.9952
 CG Neumann first N=64: info=0 iters=324 |x-direct|_inf=1.20e-11 lambda_min(DA)=11.9814
 CG Neumann ghost N=64: info=0 iters=321 |x-direct|_inf=7.67e-12 lambda_min(DA)=12.1415
+COND Robin ghost N=64: scaled_res=4.40e-16 kappa2(DA)=2.184e+03 (lmax=3.2748e+04, lmin=1.4995e+01) kappa1(A)~3.394e+03 (||A||1~3.686e+04, ||A^-1||1~9.208e-02)
+FWD Robin ghost N=64: |r_I|_inf=4.478e-11 |r_B|_inf=2.774e-11 comparison bound |U~-U_h|_inf<=2.261e-11; kappa1*rho=1.493e-12 -> rel. 1-norm bound 2.986e-12; |U|_inf=7.2745
+COND Robin ghost N=128: kappa2(DA)=8.706e+03
+COND Robin ghost N=256: kappa2(DA)=3.476e+04

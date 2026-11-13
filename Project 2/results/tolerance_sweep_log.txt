@@ -1,0 +1,17 @@
+CG on DA U = DF, Robin beta=2.0, x0=0, rtol=tol, atol=0
+ghost N=64 tol=1e-04 info=0 it= 147 relres=9.210e-05 rho=2.538e-05 |cg-dir|=1.885e-03 |cg-u*|_inf=1.882536e-03 (direct 3.335054e-05)
+ghost N=64 tol=1e-06 info=0 it= 193 relres=9.969e-07 rho=1.611e-07 |cg-dir|=2.051e-05 |cg-u*|_inf=3.893842e-05 (direct 3.335054e-05)
+ghost N=64 tol=1e-08 info=0 it= 243 relres=8.605e-09 rho=1.317e-09 |cg-dir|=8.596e-08 |cg-u*|_inf=3.336849e-05 (direct 3.335054e-05)
+ghost N=64 tol=1e-10 info=0 it= 282 relres=8.231e-11 rho=1.801e-11 |cg-dir|=7.465e-10 |cg-u*|_inf=3.335022e-05 (direct 3.335054e-05)
+ghost N=64 tol=1e-12 info=0 it= 309 relres=9.199e-13 rho=1.805e-13 |cg-dir|=8.831e-12 |cg-u*|_inf=3.335053e-05 (direct 3.335054e-05)
+first N=64 tol=1e-04 info=0 it= 148 relres=9.093e-05 rho=2.844e-05 |cg-dir|=1.789e-03 |cg-u*|_inf=9.438266e-03 (direct 8.355042e-03)
+first N=64 tol=1e-06 info=0 it= 194 relres=9.586e-07 rho=2.409e-07 |cg-dir|=1.927e-05 |cg-u*|_inf=8.359806e-03 (direct 8.355042e-03)
+first N=64 tol=1e-08 info=0 it= 244 relres=9.702e-09 rho=3.038e-09 |cg-dir|=1.393e-07 |cg-u*|_inf=8.354993e-03 (direct 8.355042e-03)
+first N=64 tol=1e-10 info=0 it= 281 relres=9.450e-11 rho=2.997e-11 |cg-dir|=1.610e-09 |cg-u*|_inf=8.355042e-03 (direct 8.355042e-03)
+first N=64 tol=1e-12 info=0 it= 316 relres=9.439e-13 rho=2.257e-13 |cg-dir|=7.580e-12 |cg-u*|_inf=8.355042e-03 (direct 8.355042e-03)
+order ghost direct tol=       fit_inf=1.9981 fit_L2=2.0029 last_inf=1.9999 last_L2=2.0002 err_inf(N=256)=2.085059e-06
+order ghost cg     tol=1e-08  fit_inf=1.9516 fit_L2=1.9753 last_inf=1.7801 last_L2=1.8671 err_inf(N=256)=2.442799e-06
+order ghost cg     tol=1e-10  fit_inf=1.9984 fit_L2=2.0030 last_inf=2.0011 last_L2=2.0006 err_inf(N=256)=2.083103e-06
+order first direct tol=       fit_inf=1.0114 fit_L2=1.0184 last_inf=1.0034 last_L2=1.0048 err_inf(N=256)=2.074504e-03
+order first cg     tol=1e-08  fit_inf=1.0114 fit_L2=1.0184 last_inf=1.0036 last_L2=1.0048 err_inf(N=256)=2.074138e-03
+order first cg     tol=1e-10  fit_inf=1.0114 fit_L2=1.0184 last_inf=1.0034 last_L2=1.0048 err_inf(N=256)=2.074506e-03
