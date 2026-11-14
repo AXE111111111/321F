@@ -1,0 +1,33 @@
+# pure-Neumann study, u* = exp(x+y), all four edges flux, (N+1)^2 unknowns
+
+## null space (dense SVD)
+first N= 16 n=289 |A1|/|A|=0.0e+00 |A^Tw|=0.0e+00 s_min/s_max=3.42e-15 s_2/s_max=4.16e-04 defic=1 |v-1/sqrt n|=2.0e-14 |u-w/|w||=7.1e-13
+first N= 32 n=1089 |A1|/|A|=0.0e+00 |A^Tw|=0.0e+00 s_min/s_max=3.50e-15 s_2/s_max=7.94e-05 defic=1 |v-1/sqrt n|=3.0e-13 |u-w/|w||=2.2e-12
+ghost N= 16 n=289 |A1|/|A|=0.0e+00 |A^Tw|=0.0e+00 s_min/s_max=2.66e-15 s_2/s_max=4.59e-03 defic=1 |v-1/sqrt n|=1.6e-14 |u-w/|w||=7.8e-14
+ghost N= 32 n=1089 |A1|/|A|=0.0e+00 |A^Tw|=0.0e+00 s_min/s_max=2.75e-15 s_2/s_max=1.17e-03 defic=1 |v-1/sqrt n|=7.5e-15 |u-w/|w||=1.5e-13
+
+## compatibility defect, gauge, convergence
+first N= 16 h^2 w^TF=3.7065e-01 p=nan delta=2.173e-02 L2=2.615e-02 p=nan Linf=9.247e-02 p=nan bnd=9.25e-02 int=7.51e-02 lambda=-2.0e-15 gauge_diff=7.4e-14 | raw: lambda=8.01e-02 Linf(border)=9.25e-02 Linf(pin)=1.97e-01 pin-row residual=9.49e+01
+first N= 32 h^2 w^TF=1.9246e-01 p=0.95 delta=1.078e-02 L2=1.335e-02 p=0.97 Linf=4.710e-02 p=0.97 bnd=4.71e-02 int=4.26e-02 lambda=5.3e-14 gauge_diff=2.0e-13 | raw: lambda=4.00e-02 Linf(border)=4.71e-02 Linf(pin)=1.24e-01 pin-row residual=1.97e+02
+first N= 64 h^2 w^TF=9.8025e-02 p=0.97 delta=5.365e-03 L2=6.754e-03 p=0.98 Linf=2.377e-02 p=0.99 bnd=2.38e-02 int=2.26e-02 lambda=-5.9e-15 gauge_diff=1.2e-12 | raw: lambda=2.00e-02 Linf(border)=2.38e-02 Linf(pin)=7.38e-02 pin-row residual=4.02e+02
+first N=128 h^2 w^TF=4.9463e-02 p=0.99 delta=2.677e-03 L2=3.397e-03 p=0.99 Linf=1.194e-02 p=0.99 bnd=1.19e-02 int=1.16e-02 lambda=3.8e-13 gauge_diff=4.8e-12 | raw: lambda=9.99e-03 Linf(border)=1.19e-02 Linf(pin)=4.27e-02 pin-row residual=8.10e+02
+first N=256 h^2 w^TF=2.4844e-02 p=0.99 delta=1.337e-03 L2=1.704e-03 p=1.00 Linf=5.984e-03 p=1.00 bnd=5.98e-03 int=5.91e-03 lambda=1.7e-12 gauge_diff=1.4e-11 | raw: lambda=4.99e-03 Linf(border)=5.98e-03 Linf(pin)=2.42e-02 pin-row residual=1.63e+03
+first N=512 h^2 w^TF=1.2450e-02 p=1.00 delta=6.683e-04 L2=8.531e-04 p=1.00 Linf=2.996e-03 p=1.00 bnd=3.00e-03 int=2.98e-03 lambda=-7.8e-12 gauge_diff=6.9e-11 | raw: lambda=2.50e-03 Linf(border)=3.00e-03 Linf(pin)=1.35e-02 pin-row residual=3.26e+03
+ghost N= 16 h^2 w^TF=-1.9227e-03 p=nan delta=-1.116e-04 L2=8.750e-04 p=nan Linf=3.069e-03 p=nan bnd=3.07e-03 int=2.50e-03 lambda=-4.7e-15 gauge_diff=4.4e-15 | raw: lambda=-1.92e-03 Linf(border)=3.07e-03 Linf(pin)=3.18e-03 pin-row residual=4.92e-01
+ghost N= 32 h^2 w^TF=-4.8058e-04 p=2.00 delta=-2.678e-05 L2=2.180e-04 p=2.01 Linf=7.673e-04 p=2.00 bnd=7.67e-04 int=6.94e-04 lambda=3.5e-16 gauge_diff=2.4e-14 | raw: lambda=-4.81e-04 Linf(border)=7.67e-04 Linf(pin)=7.94e-04 pin-row residual=4.92e-01
+ghost N= 64 h^2 w^TF=-1.2014e-04 p=2.00 delta=-6.561e-06 L2=5.445e-05 p=2.00 Linf=1.918e-04 p=2.00 bnd=1.92e-04 int=1.83e-04 lambda=4.9e-14 gauge_diff=6.9e-14 | raw: lambda=-1.20e-04 Linf(border)=1.92e-04 Linf(pin)=1.98e-04 pin-row residual=4.92e-01
+ghost N=128 h^2 w^TF=-3.0034e-05 p=2.00 delta=-1.624e-06 L2=1.361e-05 p=2.00 Linf=4.796e-05 p=2.00 bnd=4.80e-05 int=4.68e-05 lambda=2.8e-13 gauge_diff=3.0e-13 | raw: lambda=-3.00e-05 Linf(border)=4.80e-05 Linf(pin)=4.96e-05 pin-row residual=4.92e-01
+ghost N=256 h^2 w^TF=-7.5086e-06 p=2.00 delta=-4.039e-07 L2=3.402e-06 p=2.00 Linf=1.199e-05 p=2.00 bnd=1.20e-05 int=1.18e-05 lambda=6.8e-13 gauge_diff=1.6e-12 | raw: lambda=-7.51e-06 Linf(border)=1.20e-05 Linf(pin)=1.24e-05 pin-row residual=4.92e-01
+ghost N=512 h^2 w^TF=-1.8771e-06 p=2.00 delta=-1.007e-07 L2=8.505e-07 p=2.00 Linf=2.998e-06 p=2.00 bnd=3.00e-06 int=2.98e-06 lambda=5.7e-13 gauge_diff=8.7e-12 | raw: lambda=-1.88e-06 Linf(border)=3.00e-06 Linf(pin)=3.10e-06 pin-row residual=4.92e-01
+
+## spsolve on singular ghost A (N=64): result finite; no warning
+CG on DA (ghost, N=64, tol 1e-10) projected: iters=293 info=0 relres=9.25e-11 Linf(mean-gauged)=1.918e-04
+CG on DA (ghost, N=64, tol 1e-10) raw: iters=5000 info=5000 relres=1.17e-01 Linf(mean-gauged)=1.388e-03
+fit first L2     order 0.9883
+fit first Linf   order 0.9904
+fit first defect order 0.9808
+fit first Linf of pin without projection: order 0.7774
+fit ghost L2     order 2.0011
+fit ghost Linf   order 1.9999
+fit ghost defect order 2.0001
+fit ghost Linf of pin without projection: order 2.0000

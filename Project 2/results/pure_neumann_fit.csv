@@ -1,0 +1,9 @@
+closure,quantity,fitted_order,window
+first,L2,0.9883252245048504,N=16..512
+first,Linf,0.9903943831333447,N=16..512
+first,defect,0.9807563250041058,N=16..512
+first,Linf_pin_unprojected,0.7774159915819934,N=16..512
+ghost,L2,2.0011322467579014,N=16..512
+ghost,Linf,1.9999438988224414,N=16..512
+ghost,defect,2.000062032050452,N=16..512
+ghost,Linf_pin_unprojected,2.0000397620321455,N=16..512
