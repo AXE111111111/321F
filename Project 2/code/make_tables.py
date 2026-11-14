@@ -1,6 +1,6 @@
 """Rebuild LaTeX tables from CSV results into ../report/tables/."""
 from __future__ import annotations
-import csv, os
+import csv, math, os
 
 
 def main():
@@ -25,9 +25,9 @@ def main():
 
 
     def rng(lo, hi):
-        """min--max with a shared power of ten, e.g. $3.17$--$3.87\\times10^{-4}$."""
+        """min--max with a shared power of ten, e.g. $(3.17$--$3.87)\times10^{-4}$."""
         ex = int(f"{float(hi):.2e}".split("e")[1])
-        return f"${float(lo)/10**ex:.2f}$--${float(hi)/10**ex:.2f}\\times10^{{{ex}}}$"
+        return f"$({float(lo)/10**ex:.2f}$--${float(hi)/10**ex:.2f})\\times10^{{{ex}}}$"
 
 
     def p(v):
@@ -101,7 +101,7 @@ def main():
         cl = "first-order" if w["closure"] == "first" else "ghost"
         M = [
             "% written by make_tables.py from results/cost_accuracy*.csv",
-            f"\\newcommand{{\\CostSpreadMatched}}{{{100 * max(spread(r) for r in hit):.0f}}}",
+            f"\\newcommand{{\\CostSpreadMatched}}{{{math.ceil(100 * max(spread(r) for r in hit) - 1e-12):.0f}}}",
             f"\\newcommand{{\\CostWorstRatio}}{{{float(w['t_max_s']) / float(w['t_spsolve_s']):.2f}}}",
             f"\\newcommand{{\\CostWorstCase}}{{{w['bc']}, {cl}, $N={w['N']}$}}",
         ]
