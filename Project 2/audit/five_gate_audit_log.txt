@@ -1,0 +1,57 @@
+five_gate_audit.py run 2026-11-15T17:38:07 (Asia/Shanghai)
+python 3.13.5 numpy 2.5.4 scipy 1.18.1
+code root: /tmp/r18_ziptest/MTH321_Project2_TeamF_Code
+
+=== Gate 1: transcription (code rows vs report equations, term by term) ===
+mixed problem, N in {2,3,6,9}, beta in {0,0.7,2}, both closures: max rel |A-A_ref|, |F-F_ref| = 0.00e+00
+MMS: -Lap u* - f* at (0.37,0.61) = 6.1e-08; u_x+beta u - r at (1,0.61), beta=2: 8.3e-09
+pure-Neumann outward q vs centred differences of u*: max diff 8.3e-09; -Lap u* - f* = 6.1e-08
+pure-Neumann rows (edge, corner, interior), N in {2,3,6,9}, both closures: max rel diff = 0.00e+00
+
+=== Gate 2: structure and indexing ===
+mixed k=(j-1)N+(i-1): ends (1,1),(N,1),(1,N-1),(N,N-1) and centre, N in {4,7,16}, reshape (N-1,N) axis0=y: all match
+pure-Neumann k=j(N+1)+i: corners and centre, N in {4,7}: all match
+N= 16 first: csr_matrix, nnz=1110 (4.62 per row), M=240, reference row count nnz=1110
+N= 16 ghost: csr_matrix, nnz=1138 (4.74 per row), M=240, reference row count nnz=1138
+N=256 first: csr_matrix, nnz=324870 (4.98 per row), M=65280
+N=256 ghost: csr_matrix, nnz=325378 (4.98 per row), M=65280
+  N=4 ghost beta=2 row (i,j)=(4,1) h^2*coeffs: (3,1):-2, (4,1):+5, (4,2):-1
+  N=4 ghost beta=2 row (i,j)=(4,2) h^2*coeffs: (4,1):-1, (3,2):-2, (4,2):+5, (4,3):-1
+  N=4 ghost beta=2 row (i,j)=(3,2) h^2*coeffs: (3,1):-1, (2,2):-1, (3,2):+4, (4,2):-1, (3,3):-1
+max|DA-DA^T| (a=1, N in {8,64}, both closures, beta in {0,2}) = 0.0e+00
+
+=== Gate 3: linearisation (worksheet item is for nonlinear problems) ===
+Problem is linear: residual R(U)=AU-F, Jacobian J=A exactly. Directional-derivative test anyway:
+  N=32 ghost beta=2, 5 random v each: rel|FD - Av| = eps=1e-02: 7.9e-15, eps=1e-04: 7.9e-13, eps=1e-06: 8.2e-11, eps=1e-08: 7.9e-09
+  (no truncation term to shrink: the discrepancy is round-off amplified by 1/eps, as expected for a linear map)
+  solve_cg stops on rtol (relative residual, atol=0) with maxiter and returns info, iterations and the true relres.
+  N=64 ghost beta=2, tol=1e-10: info=0, iters=282, relres=8.23e-11, max|U_cg-U_spsolve|=7.5e-10
+  same with maxiter=5: info=5 (nonzero = cap reached, reported, not silent), iters=5, relres=2.42e-01
+  pure-Neumann CG (as run_pure_neumann.py: DA, projected F, tol 1e-10, maxiter 5000): info=0, iters=293
+
+=== Gate 4: independent reproduction ===
+dense numpy re-implementation (own ordering, np.linalg.solve) vs solver spsolve, N in {4,8,16,32}, beta in {0,2}, both closures: max rel diff 1.0e-13
+  dense code, u*=e^(x+y), beta=0 first: Linf N=8..64 = 1.248e-01, 5.832e-02, 2.815e-02, 1.383e-02; orders 1.10, 1.05, 1.03
+  dense code, u*=e^(x+y), beta=0 ghost: Linf N=8..64 = 3.377e-03, 8.611e-04, 2.163e-04, 5.412e-05; orders 1.97, 1.99, 2.00
+  dense code, u*=e^(x+y), beta=2 first: Linf N=8..64 = 7.070e-02, 3.430e-02, 1.685e-02, 8.355e-03; orders 1.04, 1.03, 1.01
+  dense code, u*=e^(x+y), beta=2 ghost: Linf N=8..64 = 2.066e-03, 5.307e-04, 1.332e-04, 3.335e-05; orders 1.96, 1.99, 2.00
+  quadratic u=x^2+xy+y^2+1, N=16, beta=0: ghost max err 8.4e-15 (exact in exact arithmetic), first-order 2.5e-02 (O(h) expected)
+  quadratic u=x^2+xy+y^2+1, N=16, beta=2: ghost max err 4.4e-15 (exact in exact arithmetic), first-order 1.4e-02 (O(h) expected)
+pure-Neumann: SVD left null vector vs left_null() formula, N in {4,8,16}: max diff 8.0e-12
+pure-Neumann: dense lstsq on SVD-projected data, trapezoid mean removed, vs solve_mean: max rel diff 2.1e-13
+  pure-Neumann first: Linf (mod const) N=8..64 = 1.783e-01, 9.247e-02, 4.710e-02, 2.377e-02; orders 0.95, 0.97, 0.99
+  pure-Neumann ghost: Linf (mod const) N=8..64 = 1.227e-02, 3.069e-03, 7.673e-04, 1.918e-04; orders 2.00, 2.00, 2.00
+
+=== Gate 5: interrogation (hypotheses that convergence would not reveal) ===
+Hypotheses were proposed by AI (Codex r17 review; this audit) and tested here, not accepted on trust.
+H1 corners (N=16, beta=2, first): unknowns at corners = 0; changing g by 1 at the 4 corners changes F in 0 rows, max|dU|=0.00e+00
+H1 corners (N=16, beta=2, ghost): unknowns at corners = 0; changing g by 1 at the 4 corners changes F in 2 rows, max|dU|=3.24e-01
+   -> first-order rows never read corner data; ghost rows (N,1),(N,N-1) read g(1,0), g(1,1) as their Dirichlet neighbour, as eq. (ghost) states.
+H2 pure-Neumann first N=32: |A1|/|A|=0.0e+00, |A^T w|=0.0e+00, defect h^2 w^T F=1.925e-01, w^T F~/|w||F|=3.4e-17, bordered lambda (raw F)=3.9983e-02 vs c=3.9983e-02
+H2 pure-Neumann ghost N=32: |A1|/|A|=0.0e+00, |A^T w|=0.0e+00, defect h^2 w^T F=-4.806e-04, w^T F~/|w||F|=2.9e-17, bordered lambda (raw F)=-4.8058e-04 vs c=-4.8058e-04
+H3 a=1+x, N=2, beta=0, first: A=[[24.0, -7.0], [-2.0, 2.0]], D=[1.0, 2.0], max|DA-DA^T|=3, eta(DA)=0.1655
+   a=1+x, beta=2: eta(DA) N=8 first: 7.4e-02, N=8 ghost: 0.0e+00, N=32 first: 3.7e-02, N=32 ghost: 0.0e+00
+   a=None vs a(x,y)=1 callable, N=16: max|dA|=0.0e+00, max|dF|=0.0e+00
+   -> first-order D=diag(1/h) symmetrises DA only for a==1 (all report experiments); ghost DA stays symmetric for a=1+x.
+   -> P4 (a=1+x) is solved with spsolve, not CG, so no reported number depends on the asymmetric case.
+H4 flux sign, N=64 ghost beta=2: Linf error with r=3.34e-05, with -r=6.36e+00 (a sign slip would be O(1), not hidden)
