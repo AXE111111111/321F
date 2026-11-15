@@ -22,7 +22,7 @@ depend on the font. The only randomised step is SciPy's onenormest estimate of Î
 ## Reproduce everything (from the package root, the folder that contains `code/`)
 
     python -m pytest -q tests        # 71 tests, about 1-2 s
-    python code/run_all.py           # all results, figures and LaTeX tables, about 70-130 s
+    python code/run_all.py           # all results, figures and LaTeX tables, about 1-5 min (machine-dependent)
     python validation/bank_vs_solver.py   # course test-problem bank (prints the orders)
 
 `run_all.py` writes to `results/`, `report/figures/` and `report/tables/`, plus
