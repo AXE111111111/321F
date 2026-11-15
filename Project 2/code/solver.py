@@ -90,6 +90,8 @@ def assemble(N: int, beta: float, closure: str, f, g, r, a=None):
 
 def scale_vector(I: np.ndarray, h: float, closure: str) -> np.ndarray:
     """Diagonal weights that make DA symmetric (Prop. in the report)."""
+    # NOTE: the first-order weight 1/h assumes a constant coefficient a == 1 (as in all report
+    # experiments); for variable a(x,y) the first-order DA is not symmetric, so do not use CG there.
     if closure == "ghost":
         return np.where(I == I.max(), 0.5, 1.0)
     return np.where(I == I.max(), 1.0 / h, 1.0)

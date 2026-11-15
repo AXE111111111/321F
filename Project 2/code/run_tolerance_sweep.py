@@ -3,7 +3,7 @@
 Report Section 4.2 / course checklist item "tolerance sweep on one representative mesh".
 Conjugate gradients are applied to the symmetrised SPD system DA U = DF of
 Proposition 2.x (never to the nonsymmetric A), started from U0 = 0 with the stopping
-rule ||DF - DA U_k||_2 <= tol ||DF||_2 (SciPy rtol, atol = 0). Deterministic: no random
+rule ||DF - DA U_k||_2 <= tol ||DF||_2 (SciPy rtol, atol = 0). CG itself is deterministic; no onenormest in this script
 start vectors.
 
 Part 1 (sweep): Robin (beta = 2), N = 64, both closures, tol = 1e-4, ..., 1e-12.

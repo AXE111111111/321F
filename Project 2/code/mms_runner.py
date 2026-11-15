@@ -94,7 +94,10 @@ def run():
     lmax = _eig(S, which="LA")
     lmin = _eig(S, sigma=0, which="LM")
     kappa = lmax / lmin
-    # crude 1-norm condition estimate of A via onenormest of A and of A^{-1} (via spsolve)
+    # crude 1-norm condition estimate of A via onenormest of A and of A^{-1} (via spsolve).
+    # onenormest draws random probing vectors; pin the NumPy seed and restore the state.
+    Anorm_state = np.random.get_state()
+    np.random.seed(0)
     Anorm = spla.onenormest(A)
     AT = A.T.tocsr()
     def inv_mv(v):
@@ -103,6 +106,7 @@ def run():
         return solve_direct(AT, v)
     Ainv = spla.LinearOperator(A.shape, matvec=inv_mv, rmatvec=inv_rmv)
     Ainv_norm = spla.onenormest(Ainv)
+    np.random.set_state(Anorm_state)
     kappa1 = Anorm * Ainv_norm
     P(
         f"COND Robin ghost N={N_c}: scaled_res={sres:.2e} "

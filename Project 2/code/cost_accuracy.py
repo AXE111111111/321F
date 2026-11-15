@@ -1,9 +1,10 @@
 """Cost vs accuracy at a matched target (brief ★★ / rubric D).
 
 Target: ||e||_∞ ≤ TOL. For each (bc, closure) find the smallest N in the list
-with measured L∞ ≤ TOL, then time spsolve (median of REPEATS runs, assembly
-excluded). What is NOT counted: assembly, I/O, Python overhead outside spsolve,
-CG iterations (direct solve only).
+with measured L∞ ≤ TOL, then time solve_direct (median of REPEATS runs, assembly
+excluded). The timed call converts A from CSR to CSC and then runs spsolve.
+What is NOT counted: assembly, I/O, other Python overhead, CG iterations
+(direct solve only).
 
 Writes ../results/cost_accuracy.csv and a short log.
 """
@@ -44,7 +45,7 @@ def run(tol=TOL):
         print(*a, file=log)
 
     P(f"Target ||e||_inf <= {tol:g}")
-    P("Cost measure: median wall time of spsolve over", REPEATS, "runs (assembly not counted).")
+    P("Cost measure: median wall time of solve_direct (CSR->CSC + spsolve) over", REPEATS, "runs (assembly not counted).")
     P("N candidates:", NS)
     rows = []
     # Full error table first (so we can also plot error vs cost)
@@ -72,7 +73,7 @@ def run(tol=TOL):
                         bc=lab, closure=cl, N=N, h=h, M=M,
                         Linf=Linf, t_spsolve_s=tmed, tol=tol,
                         counted="median spsolve wall time only",
-                        not_counted="assembly, I/O, CG, plotting, Python outside spsolve",
+                        not_counted="assembly, I/O, CG, plotting, Python overhead other than solve_direct (CSR->CSC + spsolve)",
                         t_min_s=float(min(ts)), t_max_s=float(max(ts)),
                     )
             if hit is None:
@@ -80,7 +81,7 @@ def run(tol=TOL):
                     bc=lab, closure=cl, N=None, h=None, M=None,
                     Linf=None, t_spsolve_s=None, tol=tol,
                     counted="median spsolve wall time only",
-                    not_counted="assembly, I/O, CG, plotting, Python outside spsolve; "
+                    not_counted="assembly, I/O, CG, plotting, Python overhead other than solve_direct; "
                                 f"no N≤{NS[-1]} reached tol={tol:g}",
                     t_min_s=None, t_max_s=None,
                 )

@@ -2,7 +2,7 @@
 
 Writes results/pure_neumann_{nullspace,defect,convergence,fit,uncorrected}.csv,
 results/pure_neumann_log.txt, report/tables/pure_neumann.tex and pure_neumann_stats.tex.
-Nothing is random; no timings are used.
+This study does not use onenormest or other randomised estimators; no timings are used.
 """
 from __future__ import annotations
 import csv, math, os, warnings
